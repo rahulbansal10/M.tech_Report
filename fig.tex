@@ -1,0 +1,114 @@
+\usetikzlibrary{calc,fit,arrows}
+\usetikzlibrary{shapes,arrows,shadows,geometric}
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata}
+
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=2em, text centered,node distance=1.0cm, minimum height=0.5em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+    minimum height=2em]
+
+
+    
+    
+\tikzstyle{input} = [coordinate]
+\tikzstyle{container} = [draw, rectangle, dashed, inner sep=1em]
+
+\begin{center}
+\begin{figure}[ht]
+\scalebox{1.0}{
+\begin{tikzpicture}
+    % Place nodes
+    \centering
+    \node [block, fill=blue!20,text width=2em, 
+    text centered,node distance=1.0cm, minimum height=0.5em] (f1) {$G_{f}^1$};
+    
+    \node[inner sep=0,minimum size=0, left of=f1, node distance = 1.2cm] (input1) {}; % invisible node
+    
+    \node [block, fill=blue!20,text width=2em, 
+    text centered,node distance=2.6cm, minimum height=0.5em, right of = f1] (y1) {$G_{y}^1$};
+    
+    \node [block, fill=blue!20,text width=2em, 
+    text centered,node distance=2.2cm, minimum height=0.5em, above of = y1] (d1) {$G_{d}$};
+    
+    \node [block, fill=blue!20,text width=2em, 
+    text centered,node distance=2.0cm, minimum height=0.5em, below of =  f1] (f2) {$G_{f}^2$};
+    
+    \node[inner sep=0,minimum size=0, left of=f2, node distance = 1.2cm] (input2) {}; % invisible node
+    
+    \node [block, fill=blue!20,text width=2em, 
+    text centered,node distance=2.6cm, minimum height=0.5em, right of = f2] (y2) {$G_{y}^2$};
+    
+    \path [line] (input1) -- node [text width=2.2cm, midway,above=0.1em] {$\mathcal{D}_s \cup \mathcal{D}_t$} (f1);
+    
+    \path [line] (input2) -- node [text width=1.2cm, midway,above=0.1em] {$\mathcal{D}_s$} (f2);
+    
+    \path [line] (f1) -- node [text width=1.1cm, midway,above=0.1em] {$F_{s}^{1} \cup F_{t}^{1}$} (y1);
+    
+    \node[inner sep=0,minimum size=0, right of=f1, node distance = 0.7cm] (fe1) {}; % invisible node
+    
+    \node [block, fill=blue!20,text width=1.1em, 
+    text centered,node distance=1.0cm, minimum height=0.2em, above of =  fe1] (grl) {grl};
+    
+    \path [line] (fe1) -- node [text width=2.0cm, midway,above=0.1em] {} (grl);
+    
+    \path [line] (grl) |- node [text width=2.0cm, midway,above=0.1em] {$F_{s}^{1} \cup F_{t}^{1}$} (d1);
+    
+    \path [line] (f2) -- node [text width=0.1em, midway,above=0.1em] {$F_{s}^{2}$} (y2);
+    
+    \node[cloud, fill=blue!20, ellipse , node distance=1.8cm,
+    minimum height=2em, right of =  d1] (ld) {$\mathcal{L}_{d}$};
+    
+    \node[cloud, fill=blue!20, ellipse , node distance=2.0cm,
+    minimum height=2em, right of =  y1] (ds1) {$\mathcal{D}_{s}^1$};
+    
+    \node[cloud, fill=blue!20, ellipse , node distance=2.0cm,
+    minimum height=2em, right of =  y2] (ds2) {$\mathcal{D}_{s}^2$};
+    
+    \node[cloud, fill=blue!20, ellipse , node distance=1.6cm,
+    minimum height=2em, right of =  ds1] (ly1) {$\mathcal{L}_{y}^1$};
+    
+    \node[cloud, fill=blue!20, ellipse , node distance=1.6cm,
+    minimum height=2em, right of =  ds2] (ly2) {$\mathcal{L}_{y}^2$};
+    
+    \path [line] (d1) -- node [text width = 0.1em, midway,above=0.1em] {} (ld);
+    
+    \path [line] (y1) -- node [text width = 0.1em, midway,above=0.1em] {$\hat{Y}_{s}^1$} (ds1);
+    
+    \path [line] (y2) -- node [text width = 0.1em, midway,below=0.1em] {} (ds2);
+    
+    
+    \path [line] (ds1) -- node [text width = 0.1em, midway,above=0.1em] {} (ly2);
+    \path [line] (ds2) -- node [text width = 0.1em, midway,above=0.1em] {} (ly1);
+    
+    \node[cloud, fill=blue!20, ellipse , node distance=1.6cm,
+    minimum height=2em, above of =  ly1] (lt) {$\mathcal{L}_{t}$};
+    \node[inner sep=0,minimum size=0, right of=y1, node distance = 0.7cm] (ye1) {}; % invisible node
+    \path [line] (ye1) |- node [text width = 0.01em, midway,below=0.1em] {$\hat{Y}_{t}^1$} (lt);
+    
+    \node [block, draw, fill=white!20,text width=4.0cm,anchor=west, node distance=9.0cm, minimum height=7.5cm, right of = f1] (legend) {$\mathcal{D}_s$: mini-batch source data\\
+    $\mathcal{D}_t$: mini-batch target data\\
+    $G_{f}^1 + G_{y}^1$ : network 1\\
+    $G_{f}^2 + G_{y}^2$ : network 2\\
+    $G_f$: feature extractor\\
+    $G_y$: feature classifier\\
+    grl: gradient reversal layer\\
+    $F_s$: features of source data\\
+    $F_t$ : features of target data\\
+    $\hat{Y}_s$ : source probabilties\\
+    $\hat{Y}_t$ : target probabilties\\
+    $G_d$: domain discriminator\\
+    $\mathcal{L}_y$: classificaton loss\\
+    $\mathcal{L}_d$: domain loss\\
+    $\mathcal{L}_t$: entropy loss\\
+    $\mathcal{D}_{s}^1$ \& $\mathcal{D}_{s}^2$: small loss data
+    ^{1,2} \text{ corresponds to network}\\};
+    
+    
+\end{tikzpicture}}
+\caption{High level flow diagram}
+\label{flowchart}
+\end{figure}
+\end{center}

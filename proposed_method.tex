@@ -1,0 +1,69 @@
+\section{Proposed Method}
+In this work, we are exploring the problem of wild unsupervised domain adaptation(WUDA) in which the target domain is fully unlabeled and the source domain is partially corrupted with label noise. The wild unsupervised domain adaptation scenario constitutes a labeled source domain ${D}_s = \{({x_i}^s, {y_i}^s)\}_{i=1}^{n_s}$ and an unlabeled target domain ${D}_t = \{({x_i}^t)\}_{i=1}^{n_t}$, while the source and target domains follow different distributions $p \neq q$. Here, we relax the assumptions of clean labels of source domain data.  Our goal is to train a deep network using noisy source data and unlabeled target which generalizes well on target data. Standard DA methods results in severe negative transfer. So we have to modify standard DA methods to eliminate the negative influence of noisy source samples and enable positive transfer of noiseless source samples.
+
+\subsection{Domain Adaptation in Adversarial Setting}
+Domain adaptation is usually reduced to matching the feature distributions of the source and target domains. In the deep learning regime, this can be done by
+learning new feature representations such that the source and target domains
+are not distinguishable by a domain discriminator. This idea leads to the a series
+of domain adversarial neural networks (DANN)\cite{uda,dann,deeptransfer}, achieving strong performance
+in standard domain adaptation with shared label space across domains.
+More formally, DANN is a two-player minimax game, where the first player is
+a domain discriminator $G_d$ trained to distinguish the source domain from the
+target domain, and the second player is a feature extractor $G_f$ simultaneously
+trained to confuse the domain discriminator. $G_y$ is the classifier to classify features extracted from $G_f$.
+In order to extract domain invariant and discriminant features from $G_f$, the parameters $w_f$ of feature extractor $G_f$ are learnt by maximizing the domain loss and minimizing the classification loss of source domain instances, while the parameters $w_d$ of domain discriminator are learnt by minimizing the domain loss. The parameters $w_y$ of classifier are learnt by minimizing the classification loss of source domain data.
+The overall objective of the Domain Adversarial Neural Network (DANN) is
+\begin{equation}
+    \mathcal{L}(w_f, w_y, w_d) &=\dfrac{1}{n_{s}} \mathlarger\sum\limits_{x_i \in D_s} L_y(G_y(G_f(x_i)),y_i) - \dfrac{\lambda}{n_s + n_t} \sum\limits_{x_i \in {D_s \cup D_t}} L_d(G_d(G_f(x_i)),d_i)
+\end{equation}
+$L_y$ and $L_d$ are classification loss and domain loss respectively. where $d_i$ is the domain label of $x_i$ , and $\lambda$ is a hyper-parameter to trade off the
+two objectives $L_y$ and $L_d$. After training convergence:
+\begin{center}
+    $\hat{w}_f, \hat{w}_y  = \argmin \limits_{w_f, w_y} \mathcal{L}(w_f, w_y, w_d)$\\
+    $\hat{w}_d  = \argmax \limits_{w_d} \mathcal{L}(w_f, w_y, w_d)$
+\end{center}
+
+\input{fig}
+
+\subsection{Modified DA for WUDA}
+Our aim is to train a deep learning model which is robust to both noisy samples and distribution shift. To tackle distribution shift, we use the standard framework of domain adversarial neural network(DANN) and to deal with noisy source sample, we incorporate co-teaching framework for feature extractor $G_f$ and classifier $G_y$. 
+Instead of maintaining one pair of feature extractor and classifier$(G_f$ \& $G_y)$, we maintain two pairs of feature extractor and classifier $(G_{f}^1$ \& $G_{y}^1)$, $(G_{f}^2$ \& $G_{y}^2)$ having parameters $(w_{f}^1$ \& $w_{y}^1)$, $(w_{f}^2$ \& $w_{y}^2)$ respectively. Mini batches are formed from noisy source data and target data$(\mathcal{D}_s, \mathcal{D}_t)$ in step 5. Some instances in $\mathcal{D}_s$ are corrupted by label noise. Applying standard DANN results in severe negative transfer. To mitigate this negative transfer, we apply co-teaching framework to select out small loss instances from $\mathcal{D}_s$ and update the parameters of the network in standard DANN framework setting.
+
+
+\begin{algorithm}[H]
+	\caption{Modified Algorithm.} 
+	\begin{algorithmic}[1]
+	    \State \textbf{Input -} Feature Extractors: $G_{f}^1$ and $G_{f}^2$(with parameters $w_{f}^1$ and $w_{f}^2$), Classifiers: $G_{y}^1$ and $G_{y}^2$(with parameters $w_{y}^1$ and $w_{y}^2$), Domain Discriminator: $G_d$ (with parameters $w_d$), learning rate $\eta$, fixed $\tau$, epoch $T_k$ and $T_{max}$, iteration $N_{max}$;
+		\For {$T=1,2,\ldots, T_{max}$}
+		    \State Source training set ${D_s}$, Target Training set ${D_t}$
+			    \For {$N=1,2,\ldots, N_{max}$}
+				    \State \textbf{Fetch} mini batch $\mathcal{D}_s$, $\mathcal{D}_t$ from ${D_s}$, ${D_t}$ respectively.
+				    \State \textbf{Obtain} $\mathcal{D}_{s}^1 = \argmin_{D':|D'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^1, G_{y}^1, D'; w_{f}^1, w_{y}^1)$ \Comment{($||$: Cardinality)}
+				    
+				    \State \textbf{Obtain} $\mathcal{D}_{s}^2 = \argmin_{D':|D'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^2, G_{y}^2, D'; w_{f}^2, w_{y}^2)$
+				
+				    \State \textbf{Obtain} $\mathcal{L}_{y}^1(G_{f}^1, G_{y}^1,\mathcal{D}_{s}^2) =\dfrac{1}{|\mathcal{D}_{s}^2|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_{s}^2} L_y(G_{y}^1(G_{f}^1(x_i)),y_i)$
+				    
+                    \State \textbf{Obtain} $\mathcal{L}_{y}^2(G_{f}^2, G_{y}^2, \mathcal{D}_{s}^1) =\dfrac{1}{|\mathcal{D}_{s}^1|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_{s}^1} L_y(G_{y}^2(G_{f}^2(x_i)),y_i)$
+				    
+				    \State \textbf{Obtain} $\mathcal{L}_d(G_{f}^1, G_{d}, \mathcal{D}_s, \mathcal{D}_t) = \dfrac{1}{|\mathcal{D}_s| + |\mathcal{D}_t|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_s \bigcup \mathcal{D}_t} L_d(G_d(G_{f}^1(x_i)), d_i)$
+				    
+				    \State \textbf{Obtain} $\mathcal{L}_t(G_{f}^1, G_{y}^1, \mathcal{D}_t) = - \dfrac{1}{|\mathcal{D}_t|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_t} G_{y}^1(G_{f}^1(x_i))*\log(G_{y}^1(G_{f}^1(x_i)))$
+				    
+				    \State \textbf{Update} $w_{f}^1 = w_{f}^1 - \eta \big( \nabla \mathcal{L}_{y}^1(w_{f}^1) + \lambda_t \nabla \mathcal{L}_{t}^1(w_{f}^1) - \lambda_d \nabla \mathcal{L}_{d}(w_{f}^1)\big)$
+				    
+				    \State \textbf{Update} $w_{y}^1 = w_{y}^1 - \eta \big(\nabla \mathcal{L}_{y}^1(w_{y}^1)+ \lambda_t \nabla\mathcal{L}_{t}^1(w_{y}^1))\big)$
+				    
+				    \State \textbf{Update} $w_{d} = w_{d} - \eta \nabla \mathcal{L}_{d}(w_{d})$
+				    
+				    \State \textbf{Update} $w_{f}^2 = w_{f}^2 - \eta \nabla \mathcal{L}_{y}^2(w_{f}^2)$
+				    
+				    \State \textbf{Update} $w_{y}^2 = w_{y}^2 - \eta \nabla \mathcal{L}_{y}^2(w_{y}^2)$
+			    \EndFor
+			 \State \textbf{Update} $R(T)= 1- min\bigg\{\dfrac{T}{T_k}\tau, \tau\bigg\}$
+	\EndFor
+	\end{algorithmic} 
+\end{algorithm}
+ In step(6, 7), we select small loss instances $\mathcal{D}_{s}^1$ and $\mathcal{D}_{s}^2$ corresponding to both the networks $(G_{f}^1$ \& $G_{y}^1)$ and $(G_{f}^2$ \& $G_{y}^2)$. Number of small loss sample be controlled by remember rate $R(T)$ which get updated after every epoch in step (16). Small loss instances are cross propagated in both the networks i.e. $\mathcal{D}_{s}^2$ through $(G_{f}^1$ \& $G_{y}^1)$ and $\mathcal{D}_{s}^1$ through $(G_{f}^2$ \& $G_{y}^2)$. Small loss instances are assumed to be much less noisy than the whole data[9], so this ensures that much cleaner source data is used to update the feature extractors and classifier.\\
+ But only this does not tackle domain shift. To address this, we use domain adversarial learning\cite{dann} to learn transferable features in a two-player minimax game: the first player is a domain discriminator $G_d$ trained to distinguish
+the feature representations of the source domain from the target domain, and the second player is a feature extractor $G_{f}^1$ trained simultaneously to deceive the domain discriminator. $G_{f}^1$ and $G_d$ are involved in two involved in two player minimax game. Unlike the standard DANN (aligning the entire source domain to the target domain), here we align the target samples with small loss samples $\mathcal{D}_{s}^2$ (Step 8).

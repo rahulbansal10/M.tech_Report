@@ -1,0 +1,94 @@
+\section{Experiments}
+We evaluate our method with state-of-the-art wild domain adaptation methods and deep domain adaptation methods using teo datasets; Office-31 and Office-Home.\\
+
+\textbf{Office-31} \cite{office} is a popular benchmark domain adaptation dataset consisting of $4652$ images of $31$ categories collected from three domains: Amazon (\textbf{A}), Webcam (\textbf{W}), and DSLR (\textbf{D}). With $3$ domains, $6$ transfer tasks are obtained.\\
+
+\textbf{Office-Home} The Office-Home dataset has been created to evaluate domain adaptation algorithms for object recognition using deep learning. It consists of images from 4 different domains: Artistic images (\textbf{Ar}), Clip Art (\textbf{Cl}), Product images (\textbf{Pr}) and Real-World images (\textbf{Re}). For each domain, the dataset contains images of 65 object categories found typically in Office and Home settings. With $4$ domains, $12$ transfer tasks are obtained.\\
+
+Since both the datasets are clean, following [31, 33], we need to corrupt these datasets manually by the noise transition matrix $Q$, where $Q_{ij} = Pr(\tilde{y} = j|y = i)$ given that noisy $\tilde{y}$ is flipped from clean $y$. Assume that the matrix $Q$ has two representative structures: (1) Symmetry flipping \cite{10.5555/2969239.2969241};
+(2) Pair flipping: a simulation of fine-grained classification with noisy labels, where labelers may make mistakes only within very similar classes.
+\newpage
+
+\begin{center}
+\begin{table*}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    \multirow{2}{3em}{Noise Vectors} & \multirow{2}{4em}{Method} &  \multicolumn{6}{|c|}{Label Corruption (40\%)}\\
+    \cline{3-8}
+    & & A->D & A->W & D->A & D->W & W->A & W->D\\
+    \hline
+    
+    \multirow{5}{3em}{Label1} & DANN & 75.65 & 76.76 & 59.74 & 79.97 & 57.67 & 78.16 \\
+    & Sequential & 82.73 & 87.39 & 60.77 & 80.94 & 64.55 & 83.28\\
+    & Co-teaching & 87.50 & 90.79 & 64.97 & 88.58 & 65.43 & 90.11\\
+    & Co-teaching with relabel & 89.46 & 87.61 & 61.93 & 86.48 & 65.99 & 92.17\\
+    & TCL & 85.69 & 83.33 & 51.94 & 87.30 & 60.92 & 94.68\\
+    \hline
+    
+    \multirow{5}{3em}{Label2} & DANN & 73.14 & 81.76 & 61.05 & 74.25 & 56.43 & 78.41 \\
+    & Sequential & 79.62 & 84.91 & 58.55 & 82.17 & 66.97 & 86.32\\
+    & Co-teaching & 81.58 & 90.82 & 59.76 & 85.53 & 64.02 & 92.72\\
+    & Co-teaching with relabel & 84.54 & 90.72 & 60.56 & 84.56 & 65.47 & 97.24\\
+    & TCL & 81.98 & 85.35 & 55.92 & 76.79 & 62.89 & 97.49\\
+    \hline
+    
+    \multirow{5}{3em}{Label3} & DANN & 72.84 & 78.46 & 59.95 & 74.31 & 50.66 & 73.80 \\
+    & Sequential & 82.53 & 88.93 & 60.57 & 88.05 & 62.11 & 82.33\\
+    & Co-teaching & 82.48 & 89.47 & 60.29 & 81.48 & 58.20 & 87.85\\
+    & Co-teaching with relabel & 85.29 & 90.82 & 61.82 & 87.17 & 61.46 & 94.53\\
+    & TCL & 81.98 & 80.82 & 52.05 & 79.62 & 54.07 & 93.42\\
+    \hline
+    
+    \multirow{5}{3em}{Average} & DANN & 73.88 & 78.99 & 60.24 & 76.17 & 54.92 & 76.79 \\
+    & Sequential & 81.63 & 87.08 & 59.96 & 83.72 & 64.54 & 83.98\\
+    & Co-teaching & 83.85 & 90.36 & 61.67 & 85.20 & 62.55 & 90.23\\
+    & Co-teaching with relabel & 86.43 & 89.72 & 61.44 & 86.07 & 64.31 & 94.65\\
+    & TCL & 83.22 & 83.17 & 53.30 & 81.24 & 59.29 & 95.20\\
+    \hline
+    \end{tabular}
+    \caption{Classification Accuracy (\%) on \textbf{Office-31} with 40\% Corruption of Labels}
+    \end{table*}
+\end{center}
+
+\vspace{-0.8cm}
+\begin{center}
+\begin{table*}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    \multirow{2}{3em}{Noise Vectors} & \multirow{2}{3em}{Method} &  \multicolumn{6}{|c|}{Label Corruption (40\%)}\\
+    \cline{3-8}
+    & & Ar->Cl & Ar->Pr & Ar->Re & Cl->Ar & Cl->Pr & Cl->Re\\
+    \hline
+    
+    \multirow{5}{3em}{Label1} & DANN & 30.95 & 49.58 & 55.53 & 35.58 & 49.00 & 47.25 \\
+    & Sequential & 32.21 & 52.17 & 58.52 & 40.75 & 51.28 & 52.66 \\
+    & Co-teaching & 35.49 & 57.74 & 64.48 & 44.07 & 57.51 & 55.78 \\
+    & TCL & 33.11 & 54.29 & 61.20 & 42.80 & 58.20 & 56.29 \\
+    \hline
+    
+    \multirow{5}{3em}{Label2} & DANN & 28.04 & 48.99 & 56.86 & 35.00 & 48.25 & 49.46 \\
+    & Sequential & 32.12 & 53.54 & 62.73 & 42.63 & 53.35 & 53.14 \\
+    & Co-teaching & 33.57 & 55.82 & 65.76 & 44.72 & 57.41 & 56.95 \\
+    & TCL & 31.54 & 54.50 & 65.18 & 44.75 & 57.00 & 58.78 \\
+    \hline
+    
+    \multirow{5}{3em}{Label3} & DANN & 27.81 & 51.98 & 58.56 & 34.93 & 47.77 & 48.03 \\
+    & Sequential & 33.85 & 53.91 & 62.32 & 41.86 & 54.98 & 55.29 \\
+    & Co-teaching & 34.26 & 58.32 & 65.57 & 43.40 & 58.28 & 59.26 \\
+    & TCL & 31.80 & 61.91 & 65.45 & 45.19 & 59.72 & 56.56 \\
+    \hline
+    
+    \multirow{5}{3em}{Average} & DANN & 28.93 & 50.18 & 56.98 & 35.17 & 48.34 & 48.24 \\
+    & Sequential & 32.73 & 53.21 & 61.19 & 41.75 & 53.20 & 53.70 \\
+    & Co-teaching & 34.44 & 57.29 & 65.27 & 44.06 & 57.73 & 57.33 \\
+    & TCL & 32.15 & 56.90 & 63.94 & 44.25 & 58.31 & 57.21 \\
+    \hline
+    \end{tabular}
+    \vspace{0.2cm}
+    \caption{Classification Accuracy (\%) on \textbf{Office-Home} with 40\% Corruption of Labels}
+    \end{table*}
+\end{center}
+
+

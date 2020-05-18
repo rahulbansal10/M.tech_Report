@@ -1,0 +1,25 @@
+\section{Preliminary on Co-teaching}
+Here we review coteaching\cite{coteaching}; is based on the study that deep models can memorize easy instances first, and gradually adapt to hard instances as training epochs become large\cite{memorization}. It can be assumed that the instances (corrupted by label noise) are hard for network to learn, and others (not corrupted) are easy. 
+Coteaching allows us to train deep networks robustly even with extremely noisy labels. Specifically, two networks $f^1$ (with parameter $w^1$) and $f^2$ (with parameters $w^2$) are maintained as shown in figure. When a mini-batch $\mathcal{D}$ is formed (step 5), we first let $f^1$ (resp. $f^2$) select a small proportion of instances in this mini-batch $\mathcal{D}^1$ (resp. $\mathcal{D}^2$) that have small training loss (steps 6 and 7). The number of instances is controlled by $R(T)$, and $f^1$ (resp. $f^2$) only selects $R(T)$ percentage of small loss instances out of the mini-batch. Then, the selected instances are fed into its peer network as the useful knowledge for parameter updates (steps 6 and 7).
+\begin{algorithm}[H]
+	\caption{Co-teaching Algorithm.} 
+	\begin{algorithmic}[1]
+	    \State \textbf{Input} $w^1$ and $w^2$, learning rate $\eta$, fixed $\tau$, epoch $T_k$ and $T_{max}$, iteration $N_{max}$;
+		\For {$T=1,2,\ldots, T_{max}$}
+		    \State Training set ${D}$;
+			    \For {$N=1,2,\ldots, N_{max}$}
+				    \State \textbf{Fetch} mini batch $\mathcal{D}$ from ${D}$
+				    \State \textbf{Obtain} $\mathcal{D}^1 = \argmin_{D':|D'|\geq R(T)|\mathcal{D}|} \mathcal{L}(f^1, D')$ 
+				    \State \textbf{Obtain} $\mathcal{D}^2 = \argmin_{D':|D'|\geq R(T)|\mathcal{D}|} \mathcal{L}(f^2, D')$
+				    \State \textbf{Update} $w^1 = w^1 - \eta \nabla \mathcal{L}(f^1,\mathcal{D}^2)$
+				    \State \textbf{Update} $w^2 = w^2 - \eta \nabla \mathcal{L}(f^2,\mathcal{D}^1)$
+			    \EndFor
+			 \State \textbf{Update} $R(T)= 1- min\bigg\{\dfrac{T}{T_k}\tau, \tau\bigg\}$
+		\EndFor
+	\end{algorithmic} 
+\end{algorithm}
+
+
+It must be noted that, when the test data follows similar distribution as the training data, Co-teaching will steadily improve learning. However, when the test data has a distribution shift from the training data, the existing curriculum
+will be less specified. Due to the distribution shift, the test data will be substantially dissimilar to the training data. That is, even the training samples with smaller loss will be noise-free, they are not necessarily relevant to the learning
+task of the test data.
