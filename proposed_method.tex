@@ -1,7 +1,11 @@
 \section{Proposed Method}
+
+In this section, we formulate the problem of Wild Unsupervised Domain Adaptation (WUDA), and then describe the proposed approach.
+
+\subsection{Problem Formulation}
 In this work, we are exploring the problem of wild unsupervised domain adaptation(WUDA) in which the target domain is fully unlabeled and the source domain is partially corrupted with label noise. The wild unsupervised domain adaptation scenario constitutes a labeled source domain ${D}_s = \{({x_i}^s, {y_i}^s)\}_{i=1}^{n_s}$ and an unlabeled target domain ${D}_t = \{({x_i}^t)\}_{i=1}^{n_t}$, while the source and target domains follow different distributions $p \neq q$. Here, we relax the assumptions of clean labels of source domain data.  Our goal is to train a deep network using noisy source data and unlabeled target which generalizes well on target data. Standard DA methods results in severe negative transfer. So we have to modify standard DA methods to eliminate the negative influence of noisy source samples and enable positive transfer of noiseless source samples.
 
-\subsection{Domain Adaptation in Adversarial Setting}
+\subsection{Base Network - Domain Adversarial Neural Network}
 Domain adaptation is usually reduced to matching the feature distributions of the source and target domains. In the deep learning regime, this can be done by
 learning new feature representations such that the source and target domains
 are not distinguishable by a domain discriminator. This idea leads to the a series
@@ -14,26 +18,71 @@ trained to confuse the domain discriminator. $G_y$ is the classifier to classify
 In order to extract domain invariant and discriminant features from $G_f$, the parameters $w_f$ of feature extractor $G_f$ are learnt by maximizing the domain loss and minimizing the classification loss of source domain instances, while the parameters $w_d$ of domain discriminator are learnt by minimizing the domain loss. The parameters $w_y$ of classifier are learnt by minimizing the classification loss of source domain data.
 The overall objective of the Domain Adversarial Neural Network (DANN) is
 \begin{equation}
-    \mathcal{L}(w_f, w_y, w_d) &=\dfrac{1}{n_{s}} \mathlarger\sum\limits_{x_i \in D_s} L_y(G_y(G_f(x_i)),y_i) - \dfrac{\lambda}{n_s + n_t} \sum\limits_{x_i \in {D_s \cup D_t}} L_d(G_d(G_f(x_i)),d_i)
+\begin{align*}
+    \mathcal{L}_y(G_f, G_y, D_s)  = \dfrac{1}{n_{s}} \mathlarger\sum\limits_{x_i \in D_s} L_y(G_y(G_f(x_i)),y_i)\\
+     \mathcal{L}_d(G_f, G_d, D_s \cup D_t) = \dfrac{1}{n_s + n_t} \sum\limits_{x_i \in {D_s \cup D_t}} L_d(G_d(G_f(x_i)),d_i)\\
+     L(w_f, w_y, w_d) = \mathcal{L}_y(G_f, G_y, D_s) - \lambda \mathcal{L}_d(G_f, G_d, D_s \cup D_t)
+\end{align*}
 \end{equation}
 $L_y$ and $L_d$ are classification loss and domain loss respectively. where $d_i$ is the domain label of $x_i$ , and $\lambda$ is a hyper-parameter to trade off the
 two objectives $L_y$ and $L_d$. After training convergence:
 \begin{center}
-    $\hat{w}_f, \hat{w}_y  = \argmin \limits_{w_f, w_y} \mathcal{L}(w_f, w_y, w_d)$\\
-    $\hat{w}_d  = \argmax \limits_{w_d} \mathcal{L}(w_f, w_y, w_d)$
+    $\hat{w}_f, \hat{w}_y  = \argmin \limits_{w_f, w_y} L(w_f, w_y, w_d)$\\
+    $\hat{w}_d  = \argmax \limits_{w_d} L(w_f, w_y, w_d)$
 \end{center}
 
 \input{fig}
 
-\subsection{Modified DA for WUDA}
+\subsection{Proposed Modified DA for WUDA}
 Our aim is to train a deep learning model which is robust to both noisy samples and distribution shift. To tackle distribution shift, we use the standard framework of domain adversarial neural network(DANN) and to deal with noisy source sample, we incorporate co-teaching framework for feature extractor $G_f$ and classifier $G_y$. 
-Instead of maintaining one pair of feature extractor and classifier$(G_f$ \& $G_y)$, we maintain two pairs of feature extractor and classifier $(G_{f}^1$ \& $G_{y}^1)$, $(G_{f}^2$ \& $G_{y}^2)$ having parameters $(w_{f}^1$ \& $w_{y}^1)$, $(w_{f}^2$ \& $w_{y}^2)$ respectively. Mini batches are formed from noisy source data and target data$(\mathcal{D}_s, \mathcal{D}_t)$ in step 5. Some instances in $\mathcal{D}_s$ are corrupted by label noise. Applying standard DANN results in severe negative transfer. To mitigate this negative transfer, we apply co-teaching framework to select out small loss instances from $\mathcal{D}_s$ and update the parameters of the network in standard DANN framework setting.
+Instead of maintaining one pair of feature extractor and classifier$(G_f$ \& $G_y)$, we maintain two pairs of feature extractor and classifier $(G_{f}^1$ \& $G_{y}^1)$, $(G_{f}^2$ \& $G_{y}^2)$ having parameters $(w_{f}^1$ \& $w_{y}^1)$, $(w_{f}^2$ \& $w_{y}^2)$ respectively. Mini batches are formed from noisy source data and target data$(\mathcal{D}_s, \mathcal{D}_t)$ in step 5. Some instances in $\mathcal{D}_s$ are corrupted by label noise. Applying standard DANN results in severe negative transfer. To mitigate this negative transfer, we apply co-teaching framework to select out small loss instances from $\mathcal{D}_s$ and update the parameters of the network in standard DANN framework setting.\\
+Standard co-teaching has a hard assumption of knowing the noise level i.e. $\epsilon$, but for most of the practical scenario we might not know the noise level. So instead of selecting out small loss instance and rejecting large loss instances in every mini batch, we suitably weigh them with weighting factor. Weighting should be inversely proportional to loss of the particular instance.
+\subsubsection{Calculation of weigting factor}
+Weights are calculated for every sample in every mini-batch to weight their corresponding loss. Since source data is noisy, so loss corresponding to every source sample will be weighed as per their weighting factor. Domain labels for source domain instance are taken to be $1$.
+
+\begin{equation*}
+    loss' = -\log(G_y(G_f(x_i)) \quad \forall x_i \in D_s
+\end{equation*}
+Since weights should be inversely proporational to loss, we have taken $e^{-loss}$ to be the weighting factor. Where $e$ is the base of $\log$ and it is $2$
+\begin{equation*}
+\begin{align}
+    e^{-loss'} = G_y(G_f(x_i)\\
+    w_{i}' =     G_y(G_f(x_i)
+\end{align}
+\end{equation*}
+We also put upper and lower thresholds on this weights i.e. for all source sample having weight (calculated as per equation 2) greater than upper thereshold are assumed to be pure and given weight of $1$ and source samples having weights lesser than lower threshold are assumed to noisy and given weight of $0$. It will be as follows:
+\begin{equation*}
+                w_{i}' = \begin{cases}
+		            0 & if\ \quad G_y(G_f(x_i) \le lower \\
+		            1 & elseif\ \quad G_y(G_f(x_i) \ge upper \\
+		            G_y(G_f(x_i) & else\ 
+		            \end{cases} \quad \forall x_i \in D_s
+\end{equation*}
+In domain adaptation scenario, we have to take care of whether a particular sample is transferable or not i.e. in the feature space how close source sample is to target sample. It can be quantified by calculating domain loss.
+\begin{equation}
+    loss = -\log(G_y(G_f(x_i)) - k \log(1 - G_d(G_f(x_i)) \quad \forall x_i \in D_s
+\end{equation}
+The added loss term $(-\log(1 - G_d(G_f(x_i)))$ is the quantification of how close source sample is to target sample in the feature space, if it is close to target, then it will be low otherwise it will be high. $k$ is the hyperparameter and to be tuned properly, so that one factor doesn't outweigh the other.
+\begin{equation}
+\begin{align}
+    e^{-loss} = G_y(G_f(x_i)(1 - G_d(G_f(x_i))^k\\
+    w_{i} =     G_y(G_f(x_i)(1 - G_d(G_f(x_i))^k
+\end{align}
+\end{equation}
+
+\begin{equation}
+                w_{i} = \begin{cases}
+		            0 & if\ \quad G_y(G_f(x_i) \le lower \\
+		            (1 - G_d(G_f(x_i))^k & elseif\ \quad G_y(G_f(x_i) \ge upper \\
+		            G_y(G_f(x_i)(1 - G_d(G_f(x_i))^k & else\ 
+		            \end{cases} \quad \forall x_i \in D_s
+\end{equation}
 
 
 \begin{algorithm}[H]
 	\caption{Modified Algorithm.} 
 	\begin{algorithmic}[1]
-	    \State \textbf{Input -} Feature Extractors: $G_{f}^1$ and $G_{f}^2$(with parameters $w_{f}^1$ and $w_{f}^2$), Classifiers: $G_{y}^1$ and $G_{y}^2$(with parameters $w_{y}^1$ and $w_{y}^2$), Domain Discriminator: $G_d$ (with parameters $w_d$), learning rate $\eta$, fixed $\tau$, epoch $T_k$ and $T_{max}$, iteration $N_{max}$;
+	    \State \textbf{Input -} Feature Extractors: $G_{f}^1$ and $G_{f}^2$(with parameters $w_{f}^1$ and $w_{f}^2$), Classifiers: $G_{y}^1$ and $G_{y}^2$(with parameters $w_{y}^1$ and $w_{y}^2$), Domain Discriminator: $G_d$ (with parameters $w_d$), learning rate $\eta$, fixed $\epsilon$, epoch $T_k$ and $T_{max}$, iteration $N_{max}$;
 		\For {$T=1,2,\ldots, T_{max}$}
 		    \State Source training set ${D_s}$, Target Training set ${D_t}$
 			    \For {$N=1,2,\ldots, N_{max}$}
