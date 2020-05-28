@@ -1,0 +1,53 @@
+\usetikzlibrary{calc,fit,arrows}
+\usetikzlibrary{shapes,arrows,shadows,geometric}
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata}
+
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=2em, text centered,node distance=1.6cm, minimum height=2em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+    minimum height=2em]
+    
+\tikzstyle{input} = [coordinate]
+\tikzstyle{container} = [draw, rectangle, dashed, inner sep=1em]
+
+
+
+
+\begin{figure}[ht]
+{
+\centering      
+\begin{tikzpicture}
+    % Place nodes
+    \node[inner sep=0,minimum size=0] (inv1) {}; % invisible node
+
+    \node [block, node distance = 3.5cm, right of = inv1] (gf1) {$G_{f}^1$};
+    
+    \node [block, right of = gf1] (gy1) {$G_{y}^1$};
+    
+    \node[container, fit=(gf1)(gy1)] (FTCBlockVal) (Blk1){};
+    \node at (Blk1.south) [below, node distance = 0.6cm and 0]{Network 1 : $P$};
+    
+    \node [block, node distance=2.5cm, right of =  gy1] (gf2) {$G_{f}^2$};
+    
+    \node [block, right of = gf2] (gy2) {$G_{y}^2$};
+    
+    \node[container, fit=(gf2)(gy2)] (FTCBlockVal) (Blk2){};
+    \node at (Blk2.south) [below, node distance = 0.6cm and 0]{Network 2 : $Q$};
+    
+    
+    % Draw edges
+    \path [line] (gf1) -- node [] {} (gy1);
+    \path [line] (gf2) -- node [] {} (gy2);
+    
+\end{tikzpicture}}
+
+\caption{Network 1 \& 2 as per co-teaching framework}
+\label{networks}
+\end{figure}
+
+
+
+
