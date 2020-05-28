@@ -44,7 +44,7 @@ Standard co-teaching has a hard assumption of knowing the noise level i.e. $\eps
 Weights are calculated for every sample in every mini-batch to weigh their corresponding loss. Since source data is noisy, so loss corresponding to every source sample will be weighed as per their weighting factor. Domain labels for source domain instance are taken to be $1$.
 
 \begin{equation*}
-    loss' = -\log(G_y(G_f(x_i)) \quad \forall x_i \in D_s
+    loss' = -\log(G_y(G_f(x_i)) \quad \forall x_i \in \mathcal{D}_s
 \end{equation*}
 Since weights should be inversely proporational to loss, we have taken $e^{-loss}$ to be the weighting factor. Where $e$ is the base of $\log$ and it is $2$
 \begin{equation}
@@ -60,11 +60,11 @@ We also put upper and lower thresholds on this weights i.e. for all source sampl
 		            0 & if\ \quad G_y(G_f(x_i) \le lower \\
 		            1 & elseif\ \quad G_y(G_f(x_i) \ge upper \\
 		            G_y(G_f(x_i) & else\ 
-		            \end{cases} \quad \forall x_i \in D_s
+		            \end{cases} \quad \forall x_i \in \mathcal{D}_s
 \end{equation*}
 In domain adaptation scenario, we have to take care of whether a particular sample is transferable or not i.e. in the feature space how close source sample is to target sample. It can be quantified by calculating domain loss.
 \begin{equation}
-    loss = -\log(G_y(G_f(x_i)) - k \log(1 - G_d(G_f(x_i)) \quad \forall x_i \in D_s
+    loss = -\log(G_y(G_f(x_i)) - k \log(1 - G_d(G_f(x_i)) \quad \forall x_i \in \mathcal{D}_s
 \end{equation}
 The added loss term $(-\log(1 - G_d(G_f(x_i)))$ is the quantification of how close source sample is to target sample in the feature space, if it is close to target, then it will be low otherwise it will be high. $k$ is the hyperparameter and to be tuned properly, so that one factor doesn't outweigh the other.
 \begin{equation}
@@ -85,8 +85,36 @@ The added loss term $(-\log(1 - G_d(G_f(x_i)))$ is the quantification of how clo
 Weights are calculated corresponding to both the networks i.e. $P$ \& $Q$. Weights corresponding to network 1 $(P)$ and network 2 $(Q)$ be denoted $w_{i}^1$ and $w_{i}^2$ respectively. Respective feature extractors and classifiers are used in the calculation of weights corresponding to each network.  
 
 \subsubsection{Algorithm for WUDA}
-We trained the network described in figure \ref{flowchart}. Domain loss and entropy loss is backpropagated through only Network 1 $(P)$. For initial few epochs, the networks $P$ (resp. $Q$) selects a small proportion of instances controlled by $R(T)$ from this mini-batch $\mathcal{D}^1$ (resp. $\mathcal{D}^2$) that have small training loss.These small loss instances are given weights of $1$ and rest instances in a mini batch are given weights of $0$. After epoch $T_{start}$, all samples in a mini batch are weighted by the formula given in equation \ref{eq:weight}. To calculate the value of $R(T)$ before epoch $T_{start}$, we take $\epsilon$ to be $0.5$ assuming noise would be less than $50\%$.
+We trained the network described in figure \ref{flowchart}. Domain loss and entropy loss is backpropagated through only Network 1 $(P)$. For initial few epochs, the networks $P$ (resp. $Q$) selects a small proportion of instances controlled by $R(T)$ from this mini-batch $\mathcal{D}_{s}^1$ (resp. $\mathcal{D}_{s}^2$) that have small training loss.These small loss instances are given weights of $1$ and rest instances in a mini batch are given weights of $0$. After epoch $T_{start}$, all samples in a mini batch are weighted by the formula given in equation \ref{eq:weight}. To calculate the value of $R(T)$ before epoch $T_{start}$, we take $\epsilon$ to be $0.5$ assuming noise would be less than $50\%$.\\
+Weights are calculated corresponding to both the networks as described in algorithm \ref{algo: cal_weight}. Weights will be calculated for each sample of the source mini batch $(\mathcal{D}_s)$. For example: $w_{i}^1$ is the weight of the $i^{th}$ sample in $\mathcal{D}_s$ corresponding to network 1 $(P)$ and $w_{i}^2$ be the weight corresponding to network 2 $(Q)$.
+\begin{equation}
+    W^j = \begin{bmatrix} w_{1}^j & w_{2}^j & \dots & w_{nb}^j \end{bmatrix}  \quad j \in \{1, 2\}
+\end{equation}
+Where $W^j$ is weight vector for a source mini batch; $j$ refers to the network. $nb$ is length of the source mini batch $(\mathcal{D}_s)$.\\
+After the calculation of weights $(W^1, W^2)$, it will be cross propagated in the peer networks to calculate the classification loss $(\mathcal{L}_{y}^j)$ as shown in the figure \ref{flowchart}.
 
+\begin{algorithm}
+    
+	\caption{Calculate Weights}
+	\begin{algorithmic}[1]
+	    \State \textbf{Input -} Source mini batch : $\mathcal{D}_s$, Mini batch size: $nb$, epoch: $T$, $R(T)$, $T_{start}$,  Feature Extractors: $G_{f}^1$ and $G_{f}^2$(with parameters $w_{f}^1$ and $w_{f}^2$), Classifiers: $G_{y}^1$ and $G_{y}^2$(with parameters $w_{y}^1$ and $w_{y}^2$), Domain Discriminator: $G_d$ (with parameters $w_d$);
+	    \State \textbf{Initialize:} $W^j = \begin{bmatrix} w_{1}^j & w_{2}^j & \dots & w_{nb}^j \end{bmatrix} =  \begin{bmatrix} 0 & 0 & \dots & 0 \end{bmatrix} \quad j \in \{1, 2\} $
+		\If{$T \le T_{start}$}
+		\State \textbf{Obtain} $\mathcal{D}_{s}^1 = \argmin_{\mathcal{D}':|\mathcal{D}'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^1, G_{y}^1, \mathcal{D}')$ \Comment{($||$: Cardinality)}
+	    \State \textbf{Obtain} $\mathcal{D}_{s}^2 = \argmin_{\mathcal{D}':|\mathcal{D}'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^2, G_{y}^2, \mathcal{D}')$
+		
+		\State \textbf{Update} $w_{i}^1 = 1 \quad if(x_i \in \mathcal{D}_{s}^1) \quad \forall x_i \in \mathcal{D}_s$
+		\State \textbf{Update} $w_{i}^2 = 1 \quad if(x_i \in \mathcal{D}_{s}^1) \quad \forall x_i \in \mathcal{D}_s$
+		\State \textbf{Obtain} $W^j = \begin{bmatrix} w_{1}^j & w_{2}^j & \dots & w_{nb}^j \end{bmatrix} \quad j \in \{1, 2\} $
+		\EndIf
+		\If{$T \ge T_{start}$}
+		\State \textbf{Calculate} $W^1$ using equation: \ref{eq:weight} with $G_{f}^1$, $G_{y}^1$ and $G_d$
+		\State \textbf{Calculate} $W^2$ using equation: \ref{eq:weight} with $G_{f}^2$, $G_{y}^2$ and $G_d$
+		\EndIf
+		\State \textbf{return} $W^1$, $W^2$
+	\end{algorithmic} 
+\label{algo: cal_weight}
+\end{algorithm}
 
 \begin{algorithm}[H]
 	\caption{Modified Algorithm.} 
@@ -118,7 +146,7 @@ We trained the network described in figure \ref{flowchart}. Domain loss and entr
 				    
 				    \State \textbf{Update} $w_{y}^2 = w_{y}^2 - \eta \nabla \mathcal{L}_{y}^2(w_{y}^2)$
 			    \EndFor
-			 \State \textbf{Update} $R(T)= 1- min\bigg\{\dfrac{T}{T_k}\tau, \tau\bigg\}$
+			 \State \textbf{Update} $R(T)= 1- min\bigg\{\dfrac{T}{T_k}\epsilon, \epsilon\bigg\}$
 	\EndFor
 	\end{algorithmic} 
 \end{algorithm}
