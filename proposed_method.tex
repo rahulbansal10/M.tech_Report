@@ -80,34 +80,32 @@ The added loss term $(-\log(1 - G_d(G_f(x_i)))$ is the quantification of how clo
 		            0 & if\ \quad G_y(G_f(x_i) \le lower \\
 		            (1 - G_d(G_f(x_i))^k & elseif\ \quad G_y(G_f(x_i) \ge upper \\
 		            G_y(G_f(x_i)(1 - G_d(G_f(x_i))^k & else\ 
-		            \end{cases} \quad \forall x_i \in D_s
+		            \end{cases} \quad \forall x_i \in \mathcal{D}_s
 \end{equation}
 Weights are calculated corresponding to both the networks i.e. $P$ \& $Q$. Weights corresponding to network 1 $(P)$ and network 2 $(Q)$ be denoted $w_{i}^1$ and $w_{i}^2$ respectively. Respective feature extractors and classifiers are used in the calculation of weights corresponding to each network.  
 
 \subsubsection{Algorithm for WUDA}
-We trained the network described in figure \ref{flowchart}. Domain loss and entropy loss is backpropagated through only Network 1 $(P)$. For initial few epochs, the networks $P$ (resp. $Q$) selects a small proportion of instances controlled by $R(T)$ from this mini-batch $\mathcal{D}_{s}^1$ (resp. $\mathcal{D}_{s}^2$) that have small training loss.These small loss instances are given weights of $1$ and rest instances in a mini batch are given weights of $0$. After epoch $T_{start}$, all samples in a mini batch are weighted by the formula given in equation \ref{eq:weight}. To calculate the value of $R(T)$ before epoch $T_{start}$, we take $\epsilon$ to be $0.5$ assuming noise would be less than $50\%$.\\
-Weights are calculated corresponding to both the networks as described in algorithm \ref{algo: cal_weight}. Weights will be calculated for each sample of the source mini batch $(\mathcal{D}_s)$. For example: $w_{i}^1$ is the weight of the $i^{th}$ sample in $\mathcal{D}_s$ corresponding to network 1 $(P)$ and $w_{i}^2$ be the weight corresponding to network 2 $(Q)$.
+We trained the network described in Figure \ref{flowchart}. Domain loss and entropy loss is backpropagated through only network 1 $(P)$. For initial few epochs, the networks $P$ (resp. $Q$) selects a small proportion of instances controlled by $R(T)$ from this mini-batch $\mathcal{D}_{s}^1$ (resp. $\mathcal{D}_{s}^2$) that have small training loss (step 4 \& 5 of Algorithm \ref{algo: cal_weight}). These small loss instances are given weights of $1$ and rest instances in a mini batch are given weights of $0$. After epoch $T_{start}$, all samples in a mini batch are weighted by the formula given in equation \ref{eq:weight}. To calculate the value of $R(T)$ before epoch $T_{start}$, we take $\epsilon$ to be $0.5$ assuming noise would be less than $50\%$.\\
+Weights are calculated corresponding to both the networks as described in Algorithm \ref{algo: cal_weight}. Weights will be calculated for each sample of the source mini batch $(\mathcal{D}_s)$. For example: $w_{i}^1$ is the weight of the $i^{th}$ sample in $\mathcal{D}_s$ corresponding to network 1 $(P)$ and $w_{i}^2$ be the weight corresponding to network 2 $(Q)$.
 \begin{equation}
     W^j = \begin{bmatrix} w_{1}^j & w_{2}^j & \dots & w_{nb}^j \end{bmatrix}  \quad j \in \{1, 2\}
 \end{equation}
-Where $W^j$ is weight vector for a source mini batch; $j$ refers to the network. $nb$ is length of the source mini batch $(\mathcal{D}_s)$.\\
-After the calculation of weights $(W^1, W^2)$, it will be cross propagated in the peer networks to calculate the classification loss $(\mathcal{L}_{y}^j)$ as shown in the figure \ref{flowchart}.
+Where $W^j$ is weight vector for a source mini batch; $j$ refers to the network. $nb$ is length of the source mini batch $(\mathcal{D}_s)$.
 
-\begin{algorithm}
-    
+\begin{algorithm}[H]
 	\caption{Calculate Weights}
 	\begin{algorithmic}[1]
 	    \State \textbf{Input -} Source mini batch : $\mathcal{D}_s$, Mini batch size: $nb$, epoch: $T$, $R(T)$, $T_{start}$,  Feature Extractors: $G_{f}^1$ and $G_{f}^2$(with parameters $w_{f}^1$ and $w_{f}^2$), Classifiers: $G_{y}^1$ and $G_{y}^2$(with parameters $w_{y}^1$ and $w_{y}^2$), Domain Discriminator: $G_d$ (with parameters $w_d$);
 	    \State \textbf{Initialize:} $W^j = \begin{bmatrix} w_{1}^j & w_{2}^j & \dots & w_{nb}^j \end{bmatrix} =  \begin{bmatrix} 0 & 0 & \dots & 0 \end{bmatrix} \quad j \in \{1, 2\} $
-		\If{$T \le T_{start}$}
+		\If{$T \leq T_{start}$}
 		\State \textbf{Obtain} $\mathcal{D}_{s}^1 = \argmin_{\mathcal{D}':|\mathcal{D}'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^1, G_{y}^1, \mathcal{D}')$ \Comment{($||$: Cardinality)}
 	    \State \textbf{Obtain} $\mathcal{D}_{s}^2 = \argmin_{\mathcal{D}':|\mathcal{D}'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^2, G_{y}^2, \mathcal{D}')$
 		
 		\State \textbf{Update} $w_{i}^1 = 1 \quad if(x_i \in \mathcal{D}_{s}^1) \quad \forall x_i \in \mathcal{D}_s$
-		\State \textbf{Update} $w_{i}^2 = 1 \quad if(x_i \in \mathcal{D}_{s}^1) \quad \forall x_i \in \mathcal{D}_s$
+		\State \textbf{Update} $w_{i}^2 = 1 \quad if(x_i \in \mathcal{D}_{s}^2) \quad \forall x_i \in \mathcal{D}_s$
 		\State \textbf{Obtain} $W^j = \begin{bmatrix} w_{1}^j & w_{2}^j & \dots & w_{nb}^j \end{bmatrix} \quad j \in \{1, 2\} $
 		\EndIf
-		\If{$T \ge T_{start}$}
+		\If{$T \textgreater T_{start}$}
 		\State \textbf{Calculate} $W^1$ using equation: \ref{eq:weight} with $G_{f}^1$, $G_{y}^1$ and $G_d$
 		\State \textbf{Calculate} $W^2$ using equation: \ref{eq:weight} with $G_{f}^2$, $G_{y}^2$ and $G_d$
 		\EndIf
@@ -115,6 +113,9 @@ After the calculation of weights $(W^1, W^2)$, it will be cross propagated in th
 	\end{algorithmic} 
 \label{algo: cal_weight}
 \end{algorithm}
+
+After the calculation of weights $(W^1, W^2)$, it will be cross propagated in the peer networks to calculate the classification loss $(\mathcal{L}_{y}^1, \mathcal{L}_{y}^2)$ as shown in the Figure \ref{flowchart}. Instances which have smaller loss (i.e. higher weight) are assumed to less noisy than instances having larger loss (i.e. lesser weight). This ensures that higher importance is given to the less noisy data to update the parameters of the $P$ \& $Q$.\\
+But only this does not tackle domain shift. To address this, we use domain adversarial learning\cite{dann} to learn transferable features in a two-player minimax game: the first player is a domain discriminator $G_d$ trained to distinguish the feature representations of the source domain from the target domain, and the second player is a feature extractor $G_{f}^1$ trained simultaneously to deceive the domain discriminator. $G_{f}^1$ and $G_d$ are involved in two involved in two player minimax game.
 
 \begin{algorithm}[H]
 	\caption{Modified Algorithm.} 
@@ -124,32 +125,31 @@ After the calculation of weights $(W^1, W^2)$, it will be cross propagated in th
 		    \State Source training set ${D_s}$, Target Training set ${D_t}$
 			    \For {$N=1,2,\ldots, N_{max}$}
 				    \State \textbf{Fetch} mini batch $\mathcal{D}_s$, $\mathcal{D}_t$ from ${D_s}$, ${D_t}$ respectively.
-				    \State \textbf{Obtain} $\mathcal{D}_{s}^1 = \argmin_{D':|D'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^1, G_{y}^1, D'; w_{f}^1, w_{y}^1)$ \Comment{($||$: Cardinality)}
+				    \State \textbf{Obtain} $W^1, W^2 = \text{Calculate Weights}$ \Comment{Algorithm \ref{algo: cal_weight}}
 				    
-				    \State \textbf{Obtain} $\mathcal{D}_{s}^2 = \argmin_{D':|D'|\geq R(T)|\mathcal{D}_{s}|} \mathcal{L}(G_{f}^2, G_{y}^2, D'; w_{f}^2, w_{y}^2)$
-				
-				    \State \textbf{Obtain} $\mathcal{L}_{y}^1(G_{f}^1, G_{y}^1,\mathcal{D}_{s}^2) =\dfrac{1}{|\mathcal{D}_{s}^2|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_{s}^2} L_y(G_{y}^1(G_{f}^1(x_i)),y_i)$
+				    \State \textbf{Obtain} $\mathcal{L}_{y}^1(G_{f}^1, G_{y}^1,W^2) =\dfrac{1}{|\mathcal{D}_{s}|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_{s}} w_{i}^2 L_y(G_{y}^1(G_{f}^1(x_i)),y_i) \quad i \in [1, nb]$
 				    
-                    \State \textbf{Obtain} $\mathcal{L}_{y}^2(G_{f}^2, G_{y}^2, \mathcal{D}_{s}^1) =\dfrac{1}{|\mathcal{D}_{s}^1|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_{s}^1} L_y(G_{y}^2(G_{f}^2(x_i)),y_i)$
+                    \State \textbf{Obtain} $\mathcal{L}_{y}^2(G_{f}^2, G_{y}^2, W^1) =\dfrac{1}{|\mathcal{D}_{s}^1|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_{s}^1} w_{i}^1 L_y(G_{y}^2(G_{f}^2(x_i)),y_i) \quad i \in [1, nb]$
 				    
-				    \State \textbf{Obtain} $\mathcal{L}_d(G_{f}^1, G_{d}, \mathcal{D}_s, \mathcal{D}_t) = \dfrac{1}{|\mathcal{D}_s| + |\mathcal{D}_t|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_s \bigcup \mathcal{D}_t} L_d(G_d(G_{f}^1(x_i)), d_i)$
+				    \State \textbf{Obtain} $\mathcal{L}_d(G_{f}^1, G_{d}, \mathcal{D}_s \cup \mathcal{D}_t) = \dfrac{1}{|\mathcal{D}_s| + |\mathcal{D}_t|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_s \cup \mathcal{D}_t} L_d(G_d(G_{f}^1(x_i)), d_i)$
 				    
-				    \State \textbf{Obtain} $\mathcal{L}_t(G_{f}^1, G_{y}^1, \mathcal{D}_t) = - \dfrac{1}{|\mathcal{D}_t|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_t} G_{y}^1(G_{f}^1(x_i))*\log(G_{y}^1(G_{f}^1(x_i)))$
+				    \State \textbf{Obtain} $\mathcal{L}_t(G_{f}^1, G_{y}^1, \mathcal{D}_t) = - \dfrac{1}{|\mathcal{D}_t|} \mathlarger\sum\limits_{x_i \in \mathcal{D}_t} H_y(G_{y}^1(G_{f}^1(x_i)))$ \Comment{ $H_y$: Entropy}
 				    
-				    \State \textbf{Update} $w_{f}^1 = w_{f}^1 - \eta \big( \nabla \mathcal{L}_{y}^1(w_{f}^1) + \lambda_t \nabla \mathcal{L}_{t}^1(w_{f}^1) - \lambda_d \nabla \mathcal{L}_{d}(w_{f}^1)\big)$
+				    \State \textbf{Obtain} $Loss_1(w_{f}^1, w_{y}^1, w_{d}^1) = \mathcal{L}_{y}^1 + \lambda_1 \mathcal{L}_{d} + \lambda_2\mathcal{L}_{t}^1$
 				    
-				    \State \textbf{Update} $w_{y}^1 = w_{y}^1 - \eta \big(\nabla \mathcal{L}_{y}^1(w_{y}^1)+ \lambda_t \nabla\mathcal{L}_{t}^1(w_{y}^1))\big)$
+				    \State \textbf{Obtain} $Loss_2(w_{f}^2, w_{y}^2) = \mathcal{L}_{y}^2$
 				    
-				    \State \textbf{Update} $w_{d} = w_{d} - \eta \nabla \mathcal{L}_{d}(w_{d})$
+				    \State \textbf{Update} $w_{f}^1 = w_{f}^1 - \eta\nabla Loss_1(w_{f}^1)$
 				    
-				    \State \textbf{Update} $w_{f}^2 = w_{f}^2 - \eta \nabla \mathcal{L}_{y}^2(w_{f}^2)$
+				    \State \textbf{Update} $w_{y}^1 = w_{y} - \eta\nabla Loss_1(w_{y}^1)$
 				    
-				    \State \textbf{Update} $w_{y}^2 = w_{y}^2 - \eta \nabla \mathcal{L}_{y}^2(w_{y}^2)$
+				    \State \textbf{Update} $w_{d} = w_{d} - \eta\nabla Loss_1(w_{d})$
+				    
+				    \State \textbf{Update} $w_{f}^2 = w_{f}^2 - \eta\nabla Loss_2(w_{f}^2)$
+				    
+				    \State \textbf{Update} $w_{y}^2 = w_{y}^2 - \eta\nabla Loss_2(w_{y}^2)$
 			    \EndFor
 			 \State \textbf{Update} $R(T)= 1- min\bigg\{\dfrac{T}{T_k}\epsilon, \epsilon\bigg\}$
 	\EndFor
 	\end{algorithmic} 
 \end{algorithm}
- In step(6, 7), we select small loss instances $\mathcal{D}_{s}^1$ and $\mathcal{D}_{s}^2$ corresponding to both the networks $(G_{f}^1$ \& $G_{y}^1)$ and $(G_{f}^2$ \& $G_{y}^2)$. Number of small loss sample be controlled by remember rate $R(T)$ which get updated after every epoch in step (16). Small loss instances are cross propagated in both the networks i.e. $\mathcal{D}_{s}^2$ through $(G_{f}^1$ \& $G_{y}^1)$ and $\mathcal{D}_{s}^1$ through $(G_{f}^2$ \& $G_{y}^2)$. Small loss instances are assumed to be much less noisy than the whole data[9], so this ensures that much cleaner source data is used to update the feature extractors and classifier.\\
- But only this does not tackle domain shift. To address this, we use domain adversarial learning\cite{dann} to learn transferable features in a two-player minimax game: the first player is a domain discriminator $G_d$ trained to distinguish
-the feature representations of the source domain from the target domain, and the second player is a feature extractor $G_{f}^1$ trained simultaneously to deceive the domain discriminator. $G_{f}^1$ and $G_d$ are involved in two involved in two player minimax game. Unlike the standard DANN (aligning the entire source domain to the target domain), here we align the target samples with small loss samples $\mathcal{D}_{s}^2$ (Step 8).
