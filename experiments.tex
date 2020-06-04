@@ -7,7 +7,6 @@ We evaluate our method with state-of-the-art wild domain adaptation methods and 
 
 Since both the datasets are clean, following [31, 33], we need to corrupt these datasets manually by the noise transition matrix $Q$, where $Q_{ij} = Pr(\tilde{y} = j|y = i)$ given that noisy $\tilde{y}$ is flipped from clean $y$. Assume that the matrix $Q$ has two representative structures: (1) Symmetry flipping \cite{10.5555/2969239.2969241};
 (2) Pair flipping: a simulation of fine-grained classification with noisy labels, where labelers may make mistakes only within very similar classes.
-\newpage
 
 \begin{center}
 \begin{table*}[h!]
@@ -90,5 +89,19 @@ Since both the datasets are clean, following [31, 33], we need to corrupt these 
     \caption{Classification Accuracy (\%) on \textbf{Office-Home} with 40\% Corruption of Labels}
     \end{table*}
 \end{center}
+
+\color{red}
+1. Mean with std for all 4 vectors should be sufficient rather than listing all separately.
+2. Pairflip and symmetric noise show separately. 
+10, 20, 30, 40, 50 percent noise - both cases 
+3. Analysis 
+(a) No noise case - does it degrade performance?
+(b) Sequential - to show integrated algo works
+(c) Without one/both weighting - to show both weighting helps.
+(d) What is the result if we know the noise label vs. we use the proposed weighting strategy.
+Some examples of initial wrong labels and examples of small loss samples.
+- Can we compare with other approaches (maybe more recent) which they have reported?
+- Real dataset - could not find any other dataset other than Bing.
+\color{black}
 
 
