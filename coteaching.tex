@@ -4,8 +4,8 @@ It is based on the small-loss concept, i.e. deep models can memorize easy instan
 The assumption is that the instances corrupted by label noise are hard for the network to learn, while the clean ones are comparatively easy. 
 
 Specifically, two networks $P$ (with parameter $w^1$) and $Q$ (with parameters $w^2$) are maintained. 
-For a mini-batch $\mathcal{D}$ (step 5), the networks $P$ (resp. $Q$) selects a small proportion of instances from this mini-batch $\mathcal{D}^1$ (resp. $\mathcal{D}^2$) that have small training loss (steps 6 and 7). 
-The number of instances is controlled by $R(T)$, and $P$ (resp. $Q$) only selects $R(T)$ percentage of small loss instances out of the mini-batch. Then, the selected instances are fed into its peer network as the useful knowledge for parameter updates (steps 8 and 9).
+For a mini-batch $\mathcal{D}$ (step 5 of Algorithm \ref{algo:coteaching}), the networks $P$ (resp. $Q$) selects a small proportion of instances from this mini-batch $\mathcal{D}^1$ (resp. $\mathcal{D}^2$) that have small training loss (steps 6 and 7 of Algorithm \ref{algo:coteaching}). 
+The number of instances is controlled by $R(T)$, and $P$ (resp. $Q$) only selects $R(T)$ percentage of small loss instances out of the mini-batch. Then, the selected instances are fed into its peer network as the useful knowledge for parameter updates (steps 8 and 9 of Algorithm \ref{algo:coteaching}).
 In the training procedure, $R(T)$ is used (at epoch $T$) to quantify the amount of small loss
 samples per mini-batch to be used to update the network weights. $R(T)$ is directly related
 to the amount of label corruption $\epsilon$ ($\epsilon$ is assumed to be known), and is defined as $R(T)= 1- \min\bigg\{\dfrac{T}{T_k}\epsilon, \epsilon\bigg\}$, where $T_k$ is the epoch after which $R(T)$ becomes constant. Typical profiles of $R(T)$ for different $\epsilon$ is shown in Figure \ref{fig:R(T)}. In algorithm 1, we observe that the model initially considers all the input data and slowly zones into the cleanly labeled data (guided by the concept of small loss instances) to train the model. After completion of $T_k$ epochs ($T_k$: hyperparameter), the network weights are updated using $(1 - \epsilon)$ portion of the training data (marked as small loss instances) and ignores the large loss samples under the assumption that they are wrongly labeled.
@@ -33,6 +33,7 @@ to the amount of label corruption $\epsilon$ ($\epsilon$ is assumed to be known)
 			 \State \textbf{Update} $R(T)= 1- \min\bigg\{\dfrac{T}{T_k}\epsilon, \epsilon\bigg\}$
 		\EndFor
 	\end{algorithmic} 
+\label{algo:coteaching}
 \end{algorithm}
 
 

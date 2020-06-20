@@ -124,7 +124,7 @@ series = {ICCV ’15}
 }
 
 
-@inproceedings{office,
+@inproceedings{office31,
 author = {Saenko, Kate and Kulis, Brian and Fritz, Mario and Darrell, Trevor},
 title = {Adapting Visual Category Models to New Domains},
 year = {2010},
@@ -150,6 +150,81 @@ numpages = {9},
 location = {Montreal, Canada},
 series = {NIPS’15}
 }
+
+@inproceedings{tcl,
+  title={Transferable Curriculum for Weakly-Supervised Domain Adaptation},
+  author={Shu, Yang and Cao, Zhangjie and Long, Mingsheng and Wang, Jianmin},
+  year={2019},
+  organization={AAAI}
+}
+
+@misc{mmd,
+    title={Deep Domain Confusion: Maximizing for Domain Invariance},
+    author={Eric Tzeng and Judy Hoffman and Ning Zhang and Kate Saenko and Trevor Darrell},
+    year={2014},
+    eprint={1412.3474},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV}
+}
+
+@inproceedings{rtn,
+author = {Long, Mingsheng and Zhu, Han and Wang, Jianmin and Jordan, Michael I.},
+title = {Unsupervised Domain Adaptation with Residual Transfer Networks},
+year = {2016},
+isbn = {9781510838819},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+booktitle = {Proceedings of the 30th International Conference on Neural Information Processing Systems},
+pages = {136–144},
+numpages = {9},
+location = {Barcelona, Spain},
+series = {NIPS’16}
+}
+
+@article{DBLP:journals/corr/ZhangBHRV16,
+  author    = {Chiyuan Zhang and
+               Samy Bengio and
+               Moritz Hardt and
+               Benjamin Recht and
+               Oriol Vinyals},
+  title     = {Understanding deep learning requires rethinking generalization},
+  journal   = {CoRR},
+  volume    = {abs/1611.03530},
+  year      = {2016},
+  url       = {http://arxiv.org/abs/1611.03530},
+  archivePrefix = {arXiv},
+  eprint    = {1611.03530},
+  timestamp = {Mon, 13 Aug 2018 16:47:02 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/ZhangBHRV16.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{curricumlearn,
+author = {Jiang, Lu and Meng, Deyu and Zhao, Qian and Shan, Shiguang and Hauptmann, Alexander G.},
+title = {Self-Paced Curriculum Learning},
+year = {2015},
+isbn = {0262511290},
+publisher = {AAAI Press},
+booktitle = {Proceedings of the Twenty-Ninth AAAI Conference on Artificial Intelligence},
+pages = {2694–2700},
+numpages = {7},
+location = {Austin, Texas},
+series = {AAAI’15}
+}
+
+@incollection{curricumlearn_latent,
+title = {Self-Paced Learning for Latent Variable Models},
+author = {M. P. Kumar and Benjamin Packer and Daphne Koller},
+booktitle = {Advances in Neural Information Processing Systems 23},
+editor = {J. D. Lafferty and C. K. I. Williams and J. Shawe-Taylor and R. S. Zemel and A. Culotta},
+pages = {1189--1197},
+year = {2010},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/3923-self-paced-learning-for-latent-variable-models.pdf}
+}
+  
+
+
 
 
 
@@ -277,4 +352,35 @@ year = 2000
                   Technique for {3D} Machine Vision",
   booktitle =	 "Proc. CVPR",
   year =	 "1986",
+}
+
+
+@INPROCEEDINGS{officehome,  author={H. {Venkateswara} and J. {Eusebio} and S. {Chakraborty} and S. {Panchanathan}},  booktitle={2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},   title={Deep Hashing Network for Unsupervised Domain Adaptation},   year={2017},  volume={},  number={},  pages={5385-5394},}
+
+
+@incollection{bing-caltech,
+title = {Exploiting weakly-labeled Web images to improve object classification: a domain adaptation approach},
+author = {Alessandro Bergamo and Torresani, Lorenzo},
+booktitle = {Advances in Neural Information Processing Systems 23},
+editor = {J. D. Lafferty and C. K. I. Williams and J. Shawe-Taylor and R. S. Zemel and A. Culotta},
+pages = {181--189},
+year = {2010},
+publisher = {Curran Associates, Inc.}
+}
+
+@inproceedings{e43c87956bec4495a9f947cef8ea2780,
+title = "Making deep neural networks robust to label noise: a loss correction approach",
+abstract = "We present a theoretically grounded approach to train deep neural networks, including recurrent networks, subject to class-dependent label noise. We propose two procedures for loss correction that are agnostic to both application domain and network architecture. They simply amount to at most a matrix inversion and multiplication, provided that we know the probability of each class being corrupted into another. We further show how one can estimate these probabilities, adapting a recent technique for noise estimation to the multi-class setting, and thus providing an end-to-end framework. Extensive experiments on MNIST, IMDB, CIFAR-10, CIFAR-100 and a large scale dataset of clothing images employing a diversity of architectures - stacking dense, convolutional, pooling, dropout, batch normalization, word embedding, LSTM and residual layers - demonstrate the noise robustness of our proposals. Incidentally, we also prove that, when ReLU is the only non-linearity, the loss curvature is immune to class-dependent label noise.",
+author = "Giorgio Patrini and Alessandro Rozza and Menon, {Aditya Krishna} and Richard Nock and Lizhen Qu",
+year = "2017",
+doi = "10.1109/CVPR.2017.240",
+language = "English",
+isbn = "9781538604588",
+pages = "2233--2241",
+editor = "Rehg, {Jim } and Liu, {Yanxi } and Wu, {Ying } and Taylor, {Camillo }",
+booktitle = "Proceedings - 30th IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2017",
+publisher = "IEEE, Institute of Electrical and Electronics Engineers",
+address = "United States of America",
+note = "IEEE Conference on Computer Vision and Pattern Recognition 2017, CVPR 2017 ; Conference date: 21-07-2017 Through 26-07-2017",
+url = "http://cvpr2017.thecvf.com/",
 }

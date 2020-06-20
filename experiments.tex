@@ -1,107 +1,171 @@
 \section{Experiments}
-We evaluate our method with state-of-the-art wild domain adaptation methods and deep domain adaptation methods using teo datasets; Office-31 and Office-Home.\\
+We evaluate our method with state-of-the-art wild domain adaptation methods and deep domain adaptation methods using these datasets; Office-31 and Office-Home.
+\subsection{Datasets}
+\label{sec:datasets}
+\textbf{Office-31} \cite{office31} is a popular benchmark domain adaptation dataset consisting of $4652$ images of $31$ categories collected from three domains: Amazon (\textbf{A}), Webcam (\textbf{W}), and DSLR (\textbf{D}). With $3$ domains, $6$ transfer tasks are obtained.\\
+\textbf{Office-Home} \cite{officehome} has been created to evaluate domain adaptation algorithms for object recognition using deep learning. It is a more challenging
+dataset for visual domain adaptation, consisting of 15,500 images from 65 classes in 4 domains: Artistic images (\textbf{Ar}), Clip Art (\textbf{Cl}), Product images (\textbf{Pr}) and Real-World images (\textbf{Re}). For each domain, the dataset contains images of 65 object categories found typically in Office and Home settings. With $4$ domains, $12$ transfer tasks are obtained.\\
 
-\textbf{Office-31} \cite{office} is a popular benchmark domain adaptation dataset consisting of $4652$ images of $31$ categories collected from three domains: Amazon (\textbf{A}), Webcam (\textbf{W}), and DSLR (\textbf{D}). With $3$ domains, $6$ transfer tasks are obtained.\\
-
-\textbf{Office-Home} The Office-Home dataset has been created to evaluate domain adaptation algorithms for object recognition using deep learning. It consists of images from 4 different domains: Artistic images (\textbf{Ar}), Clip Art (\textbf{Cl}), Product images (\textbf{Pr}) and Real-World images (\textbf{Re}). For each domain, the dataset contains images of 65 object categories found typically in Office and Home settings. With $4$ domains, $12$ transfer tasks are obtained.\\
-
-Since both the datasets are clean, following [31, 33], we need to corrupt these datasets manually by the noise transition matrix $Q$, where $Q_{ij} = Pr(\tilde{y} = j|y = i)$ given that noisy $\tilde{y}$ is flipped from clean $y$. Assume that the matrix $Q$ has two representative structures: (1) Symmetry flipping \cite{10.5555/2969239.2969241};
-(2) Pair flipping: a simulation of fine-grained classification with noisy labels, where labelers may make mistakes only within very similar classes.
+Since both the above datasets are clean, following \cite{e43c87956bec4495a9f947cef8ea2780}, we need to corrupt these datasets manually by the noise transition matrix $M$, where $M_{ij} = Pr(\tilde{y} = j|y = i)$ given that noisy $\tilde{y}$ is flipped from clean $y$. Assume that the matrix $M$ has two representative structures: (1) Symmetry flipping \cite{10.5555/2969239.2969241};
+(2) Pair flipping: a simulation of fine-grained classification with noisy labels, where labelers may make mistakes only within very similar classes.\\
+\begin{figure}[ht]
+            \centering
+            \includegraphics[scale = 0.5]{noise.png}
+            \caption{Transition matrices of different noise types.}
+\label{fig:noise}
+\end{figure}\\
+\textbf{Bing-Caltech} \cite{bing-caltech} was created with Bing and Caltech-256 datasets. The Bing dataset was formed by collecting images retrieved by Bing image search for each of the Caltech-256 category labels. Apart from the statistical differences between Bing images and Caltech images, the Bing dataset consists of rich noises, with presence of multiple objects in the same image, polysemy and caricaturization. We simply use Bing as the noisy source domain and Caltech-256 as the clean target domain. While the experiments on Office-31 and Office-Home are random noisy
+data, the experiments here represent the performance in real-world weakly-supervised domain adaptation.
+\subsection{Baselines}
+\label{subsec:baseline}
+Our approach can be used as plug in for any standard adversarial domain adaptation network. Here we use DANN\cite{dann} employed with entropy minimization on target data as a backbone. We compare our results with DANN to see how much our approach is able to improve over it. We also compare with TCL \cite{tcl} which is one of the state of the art method for WUDA. We defined two very naive variants of our approach : (1) CT-DANN-1 and (2) CT-DANN-2. In CT-DANN-1, instead of using weighting defined in \ref{eq:weight} we just use small loss samples as in standard co-teaching framework. We must know the noise level for CT-DANN-1 as it is the case in co-teaching too. This is a big disadvantage of this approach. In CT-DANN-2, we first train Network 1 and 2 defined in Figure \ref{fig:networks} using co-teaching framework defined in Algorithm \ref{algo:coteaching}; then only small loss source instances are used to train the DANN network. CT-DANN-2 approach is not end to end approach, however in deep learning world we like to have end to end architectures.
+\subsection{Network Set-up and Optimizer}
+All deep methods are implemented based on PyTorch. We use ResNet-50 pre-trained on the ImageNet dataset \cite{imagenet} as our base model, and add a fully connected bottleneck layer before its classifier layer. We fine-tune only the last residual block of the ResNet-50 model, and train the bottleneck layer, the classifier layer and the domain discriminator from scratch. The tradeoff hyper-parameter $k$ in equation \ref{eq:weight} is selected according to magnitudes of the two terms and the thresholds $(lower$ , $upper)$ in equation \ref{eq:weight} is selected according to the distribution of classifier probability values on source data i.e. $(G_{y}(G_{f}(x))$. Upper threshold is set close to 0.6 and lower threshold is set close to 0.2. Tradeoff parameters $\lambda_1$ and $\lambda_2$ defined in step 11 of Algorithm \ref{algo: ctdann} are set to be 1 and 0.1. We used mini-batch SGD with momentum of 0.9 and the same learning rate strategy as in \cite{dann}. Gradient reversal layer $(grl)$ is used in the same way as used in the DANN \cite{dann}.
+\subsection{Results}
+We created 3 label noise vector for source domain data for a particular noise level and noise type (Symmetric or Pairflip) while experimenting with Office 31 and Office-Home. We run all the approaches with label noise vectors generated to have fair comparison among approaches and report the average of the results on 3 label noise vectors for a particular approach. As Bing-Caltech dataset has native noise, so we take it as it is. We did extensive evaluation on Office 31 dataset with noise levels of 40\%, 30\% and 10\%. We expect our approach CT-DANN to perform better over standard domain adaptation in case of high noise and perform almost same in case of low level noise. Experiments with 10\% level noise shows that in the case of low level noise our approach performs similarly in comparison to standard DANN. For Office-Home, we experimented with only 40\% noise. We expect the improvement on Office-Home to be in sync with improvement on Office 31.\\
+Table \ref{tab:office_sym} and Table \ref{tab:office_pair} enlists the results of our approach CT-DANN in comparison with DANN and TCL on transfer tasks obtained from Office 31 dataset. It is evident that CT-DANN improves over the backbone DANN much significantly and beating the current state of the art TCL too. In case of low noise i.e. 10\%, performance of CT-DANN approach is close to DANN and TCL which is expected. 
 
 \begin{center}
 \begin{table*}[h!]
     \centering
     \begin{tabular}{|c|c|c|c|c|c|c|c|}
     \hline
-    \multirow{2}{3em}{Noise Vectors} & \multirow{2}{4em}{Method} &  \multicolumn{6}{|c|}{Label Corruption (40\%)}\\
+    \multirow{2}{3em}{Noise Level} & \multirow{2}{4em}{Approach} &  \multicolumn{6}{|c|}{Office 31}\\
+    \cline{3-8}
+    & & A->D & A->W & D->A & D->W & W->A & W->D\\
+    \hline
+    \multirow{3}{3em}{10\%} & DANN & 87.05 & 90.94 & 69.72 & 95.58 & 67.09 & 97.42 \\
+    & TCL & 88.49 & 91.10 & 67.41 & 96.54 & 67.07 & 98.33\\
+    & CT-DANN & 86.50 & 92.12 & 69.73 & 98.09 & 69.50 & 99.78\\
+    \hline
+    \multirow{3}{3em}{30\%} & DANN & 82.26 & 83.81 & 61.42 & 82.17 & 64.27 & 87.15 \\
+    & TCL & 84.56 & 88.73 & 61.42 & 82.82 & 67.15 & 92.59\\
+    & CT-DANN & 87.47 & 90.18 & 64.11 & 90.66 & 69.46 & 96.94\\
+    \hline
+    \multirow{3}{3em}{40\%} & DANN & 73.88 & 78.99 & 60.24 & 76.17 & 54.92 & 76.79 \\
+    & TCL & 86.48 & 89.35 & 60.17 & 82.29 & 56.60 & 89.79\\
+    & CT-DANN & 84.47 & 90.32 & 63.80 & 86.02 & 64.58 & 92.80\\
+    \hline
+    \end{tabular}
+    \caption{Classification Accuracy (\%) on \textbf{Office-31} with different Symmetric noise levels}
+    \label{tab:office_sym}
+    \end{table*}
+\end{center}
+
+\begin{center}
+\begin{table*}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    \multirow{2}{3em}{Noise Level} & \multirow{2}{4em}{Approach} &  \multicolumn{6}{|c|}{Office 31}\\
     \cline{3-8}
     & & A->D & A->W & D->A & D->W & W->A & W->D\\
     \hline
     
-    \multirow{5}{3em}{Label1} & DANN & 75.65 & 76.76 & 59.74 & 79.97 & 57.67 & 78.16 \\
-    & Sequential & 82.73 & 87.39 & 60.77 & 80.94 & 64.55 & 83.28\\
-    & Co-teaching & 87.50 & 90.79 & 64.97 & 88.58 & 65.43 & 90.11\\
-    & Co-teaching with relabel & 89.46 & 87.61 & 61.93 & 86.48 & 65.99 & 92.17\\
-    & TCL & 85.69 & 83.33 & 51.94 & 87.30 & 60.92 & 94.68\\
+    \multirow{3}{3em}{10\%} & DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & TCL & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & CT-DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
     \hline
     
-    \multirow{5}{3em}{Label2} & DANN & 73.14 & 81.76 & 61.05 & 74.25 & 56.43 & 78.41 \\
-    & Sequential & 79.62 & 84.91 & 58.55 & 82.17 & 66.97 & 86.32\\
-    & Co-teaching & 81.58 & 90.82 & 59.76 & 85.53 & 64.02 & 92.72\\
-    & Co-teaching with relabel & 84.54 & 90.72 & 60.56 & 84.56 & 65.47 & 97.24\\
-    & TCL & 81.98 & 85.35 & 55.92 & 76.79 & 62.89 & 97.49\\
+    \multirow{3}{3em}{30\%} & DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & TCL & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & CT-DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
     \hline
     
-    \multirow{5}{3em}{Label3} & DANN & 72.84 & 78.46 & 59.95 & 74.31 & 50.66 & 73.80 \\
-    & Sequential & 82.53 & 88.93 & 60.57 & 88.05 & 62.11 & 82.33\\
-    & Co-teaching & 82.48 & 89.47 & 60.29 & 81.48 & 58.20 & 87.85\\
-    & Co-teaching with relabel & 85.29 & 90.82 & 61.82 & 87.17 & 61.46 & 94.53\\
-    & TCL & 81.98 & 80.82 & 52.05 & 79.62 & 54.07 & 93.42\\
-    \hline
-    
-    \multirow{5}{3em}{Average} & DANN & 73.88 & 78.99 & 60.24 & 76.17 & 54.92 & 76.79 \\
-    & Sequential & 81.63 & 87.08 & 59.96 & 83.72 & 64.54 & 83.98\\
-    & Co-teaching & 83.85 & 90.36 & 61.67 & 85.20 & 62.55 & 90.23\\
-    & Co-teaching with relabel & 86.43 & 89.72 & 61.44 & 86.07 & 64.31 & 94.65\\
-    & TCL & 83.22 & 83.17 & 53.30 & 81.24 & 59.29 & 95.20\\
+    \multirow{3}{3em}{40\%} & DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & TCL & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & CT-DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
     \hline
     \end{tabular}
-    \caption{Classification Accuracy (\%) on \textbf{Office-31} with 40\% Corruption of Labels}
+    \caption{Classification Accuracy (\%) on \textbf{Office-31} with different Pairflip noise levels}
+    \label{tab:office_pair}
     \end{table*}
+
 \end{center}
 
-\vspace{-0.8cm}
+\vspace{-1.4cm}
 \begin{center}
 \begin{table*}[h!]
     \centering
     \begin{tabular}{|c|c|c|c|c|c|c|c|}
     \hline
-    \multirow{2}{3em}{Noise Vectors} & \multirow{2}{3em}{Method} &  \multicolumn{6}{|c|}{Label Corruption (40\%)}\\
+    \multirow{2}{3em}{Noise Level} & \multirow{2}{4em}{Approach} &  \multicolumn{6}{|c|}{Office 31}\\
     \cline{3-8}
-    & & Ar->Cl & Ar->Pr & Ar->Re & Cl->Ar & Cl->Pr & Cl->Re\\
+    & & A->D & A->W & D->A & D->W & W->A & W->D\\
     \hline
     
-    \multirow{5}{3em}{Label1} & DANN & 30.95 & 49.58 & 55.53 & 35.58 & 49.00 & 47.25 \\
-    & Sequential & 32.21 & 52.17 & 58.52 & 40.75 & 51.28 & 52.66 \\
-    & Co-teaching & 35.49 & 57.74 & 64.48 & 44.07 & 57.51 & 55.78 \\
-    & TCL & 33.11 & 54.29 & 61.20 & 42.80 & 58.20 & 56.29 \\
-    \hline
-    
-    \multirow{5}{3em}{Label2} & DANN & 28.04 & 48.99 & 56.86 & 35.00 & 48.25 & 49.46 \\
-    & Sequential & 32.12 & 53.54 & 62.73 & 42.63 & 53.35 & 53.14 \\
-    & Co-teaching & 33.57 & 55.82 & 65.76 & 44.72 & 57.41 & 56.95 \\
-    & TCL & 31.54 & 54.50 & 65.18 & 44.75 & 57.00 & 58.78 \\
-    \hline
-    
-    \multirow{5}{3em}{Label3} & DANN & 27.81 & 51.98 & 58.56 & 34.93 & 47.77 & 48.03 \\
-    & Sequential & 33.85 & 53.91 & 62.32 & 41.86 & 54.98 & 55.29 \\
-    & Co-teaching & 34.26 & 58.32 & 65.57 & 43.40 & 58.28 & 59.26 \\
-    & TCL & 31.80 & 61.91 & 65.45 & 45.19 & 59.72 & 56.56 \\
-    \hline
-    
-    \multirow{5}{3em}{Average} & DANN & 28.93 & 50.18 & 56.98 & 35.17 & 48.34 & 48.24 \\
-    & Sequential & 32.73 & 53.21 & 61.19 & 41.75 & 53.20 & 53.70 \\
-    & Co-teaching & 34.44 & 57.29 & 65.27 & 44.06 & 57.73 & 57.33 \\
-    & TCL & 32.15 & 56.90 & 63.94 & 44.25 & 58.31 & 57.21 \\
+    \multirow{5}{3em}{40\%} & DANN & 73.88 & 78.99 & 60.24 & 76.17 & 54.92 & 76.79 \\
+    & TCL & 86.48 & 89.35 & 60.17 & 82.29 & 56.60 & 89.79\\
+    & CT-DANN & 84.47 & 90.32 & 63.80 & 86.02 & 64.58 & 92.80\\
+    & CT-DANN-1 & 83.85 & 90.36 & 61.67 & 85.20 & 62.55 & 90.23 \\
+    & CT-DANN-2 & 81.63 & 87.08 & 59.96 & 83.72 & 64.54 & 83.98 \\
     \hline
     \end{tabular}
-    \vspace{0.2cm}
-    \caption{Classification Accuracy (\%) on \textbf{Office-Home} with 40\% Corruption of Labels}
+    \caption{Comparison with variants of CT-DANN for 0.4 Symmetric noise level}
+    \label{tab:office_var}
+    \end{table*}
+\end{center}
+\vspace{-1cm}
+\begin{center}
+\begin{table*}[h!]
+    \centering
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \multirow{2}{3em}{Noise Level} & \multirow{2}{4em}{Approach} &  \multicolumn{12}{|c|}{Office-Home}\\
+    \cline{3-14}
+    & & Ar->Cl & Ar->Pr & Ar->Re & Cl->Ar & Cl->Pr & Cl->Re & Pr->Ar & Pr->Cl & Pr->Re & Re->Ar & Re->Cl & Re->Pr\\
+    \hline
+    
+    \multirow{3}{3em}{40\%} & DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & TCL & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & CT-DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    \hline
+    \end{tabular}
+    }
+    \caption{Classification Accuracy (\%) on \textbf{Office-Home} with 40\% Symmetric noise levels}
     \end{table*}
 \end{center}
 
-\color{red}
-1. Mean with std for all 4 vectors should be sufficient rather than listing all separately.
-2. Pairflip and symmetric noise show separately. 
-10, 20, 30, 40, 50 percent noise - both cases 
-3. Analysis 
-(a) No noise case - does it degrade performance?
-(b) Sequential - to show integrated algo works
-(c) Without one/both weighting - to show both weighting helps.
-(d) What is the result if we know the noise label vs. we use the proposed weighting strategy.
-Some examples of initial wrong labels and examples of small loss samples.
-- Can we compare with other approaches (maybe more recent) which they have reported?
-- Real dataset - could not find any other dataset other than Bing.
-\color{black}
+\begin{center}
+\begin{table*}[h]
+    \centering
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \multirow{2}{3em}{Noise Level} & \multirow{2}{4em}{Approach} &  \multicolumn{12}{|c|}{Office-Home}\\
+    \cline{3-14}
+    & & Ar->Cl & Ar->Pr & Ar->Re & Cl->Ar & Cl->Pr & Cl->Re & Pr->Ar & Pr->Cl & Pr->Re & Re->Ar & Re->Cl & Re->Pr\\
+    \hline
+    
+    \multirow{3}{3em}{40\%} & DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & TCL & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & CT-DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    \hline
+    \end{tabular}
+    }
+    \caption{Classification Accuracy (\%) on \textbf{Office-Home} with 40\% Pairflip noise levels}
+    \end{table*}
+\end{center}
+\vspace{-1.2cm}
+Table \ref{tab:office_var} lists the results of CT-DANN and its variants (defined in \ref{subsec:baseline}) in comparison with DANN and TCL for 40\% noise level. Performance of CT-DANN-1 is close to CT-DANN, but there is hard assumption of knowing the noise level for CT-DANN-1. With CT-DANN-2, we were able to get improvement over backbone DANN, but it is not an end to end deep architecture and hard assumption of knowing the noise level holds in this also.\\
+For Office-Home, we experimented only with 40\% noise Symmetric as well as Pairflip. We expect our approach to perform similarly for other noise level too as that of Office-31.
+
+
+
+% \color{red}
+% 1. Mean with std for all 4 vectors should be sufficient rather than listing all separately.
+% 2. Pairflip and symmetric noise show separately. 
+% 10, 20, 30, 40, 50 percent noise - both cases 
+% 3. Analysis 
+% (a) No noise case - does it degrade performance?
+% (b) Sequential - to show integrated algo works
+% (c) Without one/both weighting - to show both weighting helps.
+% (d) What is the result if we know the noise label vs. we use the proposed weighting strategy.
+% Some examples of initial wrong labels and examples of small loss samples.
+% - Can we compare with other approaches (maybe more recent) which they have reported?
+% - Real dataset - could not find any other dataset other than Bing.
+% - Another backbone.
+% \color{black}
 
 
