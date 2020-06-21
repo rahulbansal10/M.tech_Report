@@ -7,8 +7,8 @@ Domain adaptation (DA) aims to learn domain invariant features which are discrim
 Existing unsupervised DA (UDA) approaches assume that the source domain has clean labeled data training data, while the target data is unlabeled. 
 This is a restrictive assumption, since source domain data is usually collected from crowd sourcing platform or crawling through the Internet making their labels noisy and not completely reliable.
 
-In this work, we address the more realistic and significantly more challenging wildy unsupervised domain adaptation (WUDA) [][], which aims to transfer knowledge from noisy labeled data in source domain ($\tilde{P_s}$, i.e., noisy source data) to unlabeled target data ($P_t$).
-This is a relatively unexplored area and it is only recently that researchers have started to address this problem[].
+In this work, we address the more realistic and significantly more challenging wildy unsupervised domain adaptation (WUDA) \cite{tcl,butterfly}, which aims to transfer knowledge from noisy labeled data in source domain ($\tilde{P_s}$, i.e., noisy source data) to unlabeled target data ($P_t$).
+This is a relatively unexplored area and it is only recently that researchers have started to address this problem \cite{tcl,butterfly}.
 %Unfortunately, existing DA methods share an implicit assumption that there are no noisy source data. Namely, these methods focus on transferring knowledge from clean source data ($P_s$) to unlabeled target data ($P_{x_{t}}$).\\
 A naive approach to handle WUDA is to directly apply standard UDA methods, which will simply match the target domain with the entire noisy
 source domain, resulting in severe negative transfer and performance degradation. 
@@ -21,6 +21,6 @@ It trains two networks in parallel and updates the weights of the networks using
 Our proposed method worked as a plug in for standard adversarial domain adaptation methods.
 As in standard adversarial DA, there are mainly two losses: classification loss (to learn the discriminative features), domain loss (to learn the domain invariant features). and there are three networks $G_f$ ( feature extractor), $G_d$ (domain discriminator), $G_y$ (classifier). In our proposed method for WUDA, two identical feature extractors and classifiers are maintained. Classification loss is calculated only through small loss instances and cross propagated in the peer feature extractor network to update the parameters. However, domain loss is backpropagated as in standard DA using only one feature extractor. Our approach is not restricted to knowing the noise level in the source data, as it is not straight forward to know how much noise is present in the source data. Even in the scenario of very low noise or no noise source data, our approach does not degrade with respect to the standard domain adaptation network.
 
-Extensive experiments and comparisons with the state-of-the-art approaches have been performed on three different datasets, namely Office 31 \cite{office31}, Office Home \cite{officehome} and Bing-Caltech 
+Extensive experiments and comparisons with the state-of-the-art approaches have been performed on three different datasets, namely Office-31 \cite{office31}, Office-Home \cite{officehome} and Bing-Caltech 
 \cite{bing-caltech}. Office 31 and Office Home are clean datasets. We introduce symmetric and pairflip 
 label corruption in these datasets defined in Section \ref{sec:datasets}. Bing-Caltech has native noise in the images collected from search engine Bing. Further, experiments on the Bing-Caltech dataset shows the effectiveness of the approach for real noisy data.

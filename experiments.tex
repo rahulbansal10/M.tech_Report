@@ -1,5 +1,5 @@
 \section{Experiments}
-We evaluate our method with state-of-the-art wild domain adaptation methods and deep domain adaptation methods using these datasets; Office-31 and Office-Home.
+We evaluate our method with state-of-the-art wild domain adaptation methods and deep domain adaptation methods using these datasets; Office-31, Office-Home and Bing-Caltech.
 \subsection{Datasets}
 \label{sec:datasets}
 \textbf{Office-31} \cite{office31} is a popular benchmark domain adaptation dataset consisting of $4652$ images of $31$ categories collected from three domains: Amazon (\textbf{A}), Webcam (\textbf{W}), and DSLR (\textbf{D}). With $3$ domains, $6$ transfer tasks are obtained.\\
@@ -18,7 +18,7 @@ Since both the above datasets are clean, following \cite{e43c87956bec4495a9f947c
 data, the experiments here represent the performance in real-world weakly-supervised domain adaptation.
 \subsection{Baselines}
 \label{subsec:baseline}
-Our approach can be used as plug in for any standard adversarial domain adaptation network. Here we use DANN\cite{dann} employed with entropy minimization on target data as a backbone. We compare our results with DANN to see how much our approach is able to improve over it. We also compare with TCL \cite{tcl} which is one of the state of the art method for WUDA. We defined two very naive variants of our approach : (1) CT-DANN-1 and (2) CT-DANN-2. In CT-DANN-1, instead of using weighting defined in \ref{eq:weight} we just use small loss samples as in standard co-teaching framework. We must know the noise level for CT-DANN-1 as it is the case in co-teaching too. This is a big disadvantage of this approach. In CT-DANN-2, we first train Network 1 and 2 defined in Figure \ref{fig:networks} using co-teaching framework defined in Algorithm \ref{algo:coteaching}; then only small loss source instances are used to train the DANN network. CT-DANN-2 approach is not end to end approach, however in deep learning world we like to have end to end architectures.
+Our approach can be used as plug in for any standard adversarial domain adaptation network. Here we use DANN\cite{dann} employed with entropy minimization on target data as a backbone. We compare our results with DANN to see how much our approach is able to improve over it. We also compare with TCL \cite{tcl} which is one of the state of the art method for WUDA. We defined two very naive variants of our approach : (1) CT-DANN-1 and (2) CT-DANN-2. In CT-DANN-1, instead of using weighting defined in equation \ref{eq:weight} we just use small loss samples as in standard co-teaching framework. We must know the noise level for CT-DANN-1 as it is the case in co-teaching too. This is a big disadvantage of this approach. In CT-DANN-2, we first train Network 1 and 2 defined in Figure \ref{fig:networks} using co-teaching framework defined in Algorithm \ref{algo:coteaching}; then only small loss source instances are used to train the DANN network. CT-DANN-2 approach is not end to end approach, however in deep learning world we like to have end to end architectures.
 \subsection{Network Set-up and Optimizer}
 All deep methods are implemented based on PyTorch. We use ResNet-50 pre-trained on the ImageNet dataset \cite{imagenet} as our base model, and add a fully connected bottleneck layer before its classifier layer. We fine-tune only the last residual block of the ResNet-50 model, and train the bottleneck layer, the classifier layer and the domain discriminator from scratch. The tradeoff hyper-parameter $k$ in equation \ref{eq:weight} is selected according to magnitudes of the two terms and the thresholds $(lower$ , $upper)$ in equation \ref{eq:weight} is selected according to the distribution of classifier probability values on source data i.e. $(G_{y}(G_{f}(x))$. Upper threshold is set close to 0.6 and lower threshold is set close to 0.2. Tradeoff parameters $\lambda_1$ and $\lambda_2$ defined in step 11 of Algorithm \ref{algo: ctdann} are set to be 1 and 0.1. We used mini-batch SGD with momentum of 0.9 and the same learning rate strategy as in \cite{dann}. Gradient reversal layer $(grl)$ is used in the same way as used in the DANN \cite{dann}.
 \subsection{Results}
@@ -101,11 +101,12 @@ Table \ref{tab:office_sym} and Table \ref{tab:office_pair} enlists the results o
     & CT-DANN-2 & 81.63 & 87.08 & 59.96 & 83.72 & 64.54 & 83.98 \\
     \hline
     \end{tabular}
-    \caption{Comparison with variants of CT-DANN for 0.4 Symmetric noise level}
+    \caption{Comparison with variants of CT-DANN for 40\% Symmetric noise level}
     \label{tab:office_var}
     \end{table*}
 \end{center}
 \vspace{-1cm}
+
 \begin{center}
 \begin{table*}[h!]
     \centering
@@ -117,9 +118,9 @@ Table \ref{tab:office_sym} and Table \ref{tab:office_pair} enlists the results o
     & & Ar->Cl & Ar->Pr & Ar->Re & Cl->Ar & Cl->Pr & Cl->Re & Pr->Ar & Pr->Cl & Pr->Re & Re->Ar & Re->Cl & Re->Pr\\
     \hline
     
-    \multirow{3}{3em}{40\%} & DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
-    & TCL & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
-    & CT-DANN & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    \multirow{3}{3em}{40\%} & DANN & 28.93 & 50.18 & 56.98 & 35.17 & 48.34 & 48.24 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & TCL & 32.15 & 56.90 & 63.94 & 44.25 & 58.31 & 57.21 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
+    & CT-DANN & 35.93 & 58.99 & 66.00 & 46.32 & 58.90 & 59.08 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 & 00.00 \\
     \hline
     \end{tabular}
     }
@@ -148,8 +149,31 @@ Table \ref{tab:office_sym} and Table \ref{tab:office_pair} enlists the results o
     \end{table*}
 \end{center}
 \vspace{-1.2cm}
+
+\begin{center}
+\begin{table*}[h]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    {Noise} & {Approach} & {Bing-Caltech}\\
+    % \cline{3-4}
+    \hline
+    \multirow{3}{6em}{Native Noise} & DANN & 77.28\\
+    & TCL & 79.03\\
+    & CT-DANN & 78.60\\
+    \hline
+    \end{tabular}
+    \caption{Classification Accuracy (\%) on \textbf{Bing-Caltech}}
+    \label{tab:bing-cal}
+    \end{table*}
+\end{center}
+\vspace{-1.0cm}
 Table \ref{tab:office_var} lists the results of CT-DANN and its variants (defined in \ref{subsec:baseline}) in comparison with DANN and TCL for 40\% noise level. Performance of CT-DANN-1 is close to CT-DANN, but there is hard assumption of knowing the noise level for CT-DANN-1. With CT-DANN-2, we were able to get improvement over backbone DANN, but it is not an end to end deep architecture and hard assumption of knowing the noise level holds in this also.\\
-For Office-Home, we experimented only with 40\% noise Symmetric as well as Pairflip. We expect our approach to perform similarly for other noise level too as that of Office-31.
+For Office-Home, we experimented only with 40\% noise Symmetric as well as Pairflip. We expect our approach to perform better for other noise level too as it is in Office-31.\\
+Improvement over DANN for Bing-Caltech is not significant. The noise in Bing dataset consists of multiple objects in the image, caricaturization of the image.
+
+\section{Conclusion and Future Work}
+Our aim was to incorporate co-teaching framework in any standard domainadptation network. We experimented using DANN as a backbone. From experiments, It is evident improvement over DANN is quite significant. We plan to experiment using some another standard domain adaptation network CDAN also \cite{cdan}. In this work, we experimented with label noise, but ideally our approach should work for other noise as noisy image or blurred image. We plan to conduct more research in the area where noise is present in the image itself or features are corrupted.   
 
 
 

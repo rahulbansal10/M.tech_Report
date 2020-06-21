@@ -488,11 +488,11 @@
   \hrule
   \vskip\baselineskip
   \def\BMVA@blfootnote{\xdef\@thefnmark{}\@footnotetext}%^
-  \BMVA@blfootnote{\null\hspace{-1.9em}\copyright{} \BMVA@year.
-    The copyright of this document resides with its authors.    
-%\hfill doi:10.5244/C.\arabic{BMVA@shortyear}.NNN % DOI will be inserted directly on the PDF
-\\
-    It may be distributed unchanged freely in print or electronic forms.}%^
+%   \BMVA@blfootnote{\null\hspace{-1.9em}\copyright{} \BMVA@year.
+%     The copyright of this document resides with its authors.    
+% %\hfill doi:10.5244/C.\arabic{BMVA@shortyear}.NNN % DOI will be inserted directly on the PDF
+% \\
+%     It may be distributed unchanged freely in print or electronic forms.}%^
   \setcounter{footnote}{0}%^
   \thispagestyle{bmv@c}\pagestyle{bmv@c}%^
   \gdef\maketitle{\message{Cannot use maketitle twice}}%^
