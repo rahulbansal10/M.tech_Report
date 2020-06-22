@@ -177,4 +177,4 @@ But only this does not tackle domain shift. To address this, we use domain adver
 \label{algo: ctdann}
 \end{algorithm}
 Gradient reveral layer $(grl)$ \cite{uda} as shown in Figure \ref{flowchart} takes cares of min-max optimization between $G_{f}^1$ and $G_d$. After trainig, we use the network 1 $(P)$ i.e. $(G_{f}^1$ \& $G_{y}^1)$ to classify the target data. CT-DANN framework filters out the noisy samples from
-hurting the classifier and transfer the relevant source samples through domain-adversarial learning. This yields a novel end-to-end deep architecture for weakly-supervised domain adaptation. Here we used DANN as a backbone, similarly we can use other well estabished standard domain adapatation network and integrate co-teaching in the same way it is done here.
+hurting the classifier and transfer the relevant source samples through domain-adversarial learning. This yields a novel end-to-end deep architecture for wild unsupervised domain adaptation. Here we used DANN as a backbone, similarly we can use other well estabished standard domain adapatation network and integrate co-teaching in the same way it is done here.

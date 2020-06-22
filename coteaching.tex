@@ -23,7 +23,7 @@ to the amount of label corruption $\epsilon$ ($\epsilon$ is assumed to be known)
 		    \State Training set ${D}$;
 			    \For {$N=1,2,\ldots, N_{max}$}
 				    \State \textbf{Fetch} mini batch $\mathcal{D}$ from ${D}$
-				    \State \textbf{Obtain} $\mathcal{D}^1 = \argmin_{\mathcal{D}':|\mathcal{D}'|\geq R(T)|\mathcal{D}|} \mathcal{L}(P, \mathcal{D}')$   \Comment{$\mathcal{L}$: cross entropy loss}
+				    \State \textbf{Obtain} $\mathcal{D}^1 = \argmin_{\mathcal{D}':|\mathcal{D}'|\geq R(T)|\mathcal{D}|} \mathcal{L}(P, \mathcal{D}')$   \Comment{$\mathcal{L}$: classification loss}
 				    \State \textbf{Obtain} $\mathcal{D}^2 = \argmin_{\mathcal{D}':|\mathcal{D}'|\geq R(T)|\mathcal{D}|} \mathcal{L}(Q, \mathcal{D}')$
 				    \State \textbf{Obtain} $L^1(w^1) = \mathcal{L}(P,\mathcal{D}^2)$ \Comment{Loss for network 1: $P$}
 				    \State \textbf{Obtain} $L^2(w^2) = \mathcal{L}(Q,\mathcal{D}^1)$ \Comment{Loss for network 2: $Q$}
