@@ -2,25 +2,30 @@
 The immense success of deep learning networks depends upon the availability of well-annotated training datasets on the domains of the tasks of interest. 
 %Deep learning networks have shown significant advancement in the field of computer vision with image classification\cite{imagenet} as one of the prominent examples. A key factor to achieve such advancements is the availability of well-annotated training datasets on the domains of the tasks of interest. 
 However, such annotations can be overly expensive to attain for the amount of data required for plausible performance by today’s deep neural networks. 
-Domain adaptation approaches attempt to compensate for lack of annotated data in a \textit{target domain}, by leveraging information from a \textit{source domain}, for which annotated data is easier to obtain. 
-Domain adaptation (DA) aims to learn domain invariant features which are discriminative in nature, so that task classifiers learned from the source data can be readily applied to the target domain~\cite{uda,dann,ctc,ltdan,atda,saito2017maximum}.
-Existing unsupervised DA (UDA) approaches assume that the source domain has clean labeled data training data, while the target data is unlabeled. 
-This is a restrictive assumption, since source domain data is usually collected from crowd sourcing platform or crawling through the Internet making their labels noisy and not completely reliable.
+Domain adaptation (DA) approaches attempt to compensate for lack of annotated data in a \textit{target domain}, by leveraging information from a \textit{source domain}, for which annotated data is easier to obtain. 
+They aim to learn domain invariant features which are discriminative in nature, so that task classifiers learned from the source data can be readily applied to the target domain~\cite{uda,dann,ctc,ltdan,atda,saito2017maximum}.
+Existing unsupervised DA (UDA) approaches assume that the source domain has clean labeled training data, while the target data is unlabeled. 
+This is a restrictive assumption, since source domain data is usually collected from crowd sourcing platform or crawling through the internet making their labels noisy and not completely reliable.
 
-In this work, we address the more realistic and significantly more challenging wildy unsupervised domain adaptation (WUDA) \cite{tcl,butterfly}, which aims to transfer knowledge from noisy labeled data in source domain ($\tilde{P_s}$, i.e., noisy source data) to unlabeled target data ($P_t$).
+In this work, we address the more realistic and significantly more challenging wildy unsupervised domain adaptation (WUDA) \cite{tcl,butterfly}, which aims to transfer knowledge from noisy labeled data in source domain ($\tilde{P_s}$) to unlabeled target data ($P_t$).
 This is a relatively unexplored area and it is only recently that researchers have started to address this problem \cite{tcl,butterfly}.
 %Unfortunately, existing DA methods share an implicit assumption that there are no noisy source data. Namely, these methods focus on transferring knowledge from clean source data ($P_s$) to unlabeled target data ($P_{x_{t}}$).\\
 A naive approach to handle WUDA is to directly apply standard UDA methods, which will simply match the target domain with the entire noisy
 source domain, resulting in severe negative transfer and performance degradation. 
 
-In this work, we propose a novel approach to address the WUDA task, which aims to select clean instances from the noisy source samples and use these samples to update the domain adaptation model. 
+In this work, we propose a novel approach to address the WUDA task, which aims to select clean instances from the noisy source samples and uses these samples to update the domain adaptation model. 
 The bottleneck is how to select the clean instances out of noisy instances?
-Inspired by the success of the small-loss clean sample selection approaches, we incorporate one of the state-of-the-art model \textit{Co-teaching}\cite{coteaching} in \textit{domain-adversarial neural network} (DANN)\cite{dann}. 
-Co-teaching addresses the task of image classification under noisy labels, is based on the study that deep models can memorize easy instances first, and gradually adapt to hard instances as training epochs become large~\cite{memorization}. 
+Inspired by the success of the small-loss clean sample selection approaches, we incorporate one of the state-of-the-art model \textit{Co-teaching}~\cite{coteaching} in \textit{domain-adversarial neural network} (DANN)~\cite{dann}. 
+Co-teaching addresses the task of image classification under noisy labels, and is based on the study that deep models can memorize easy instances first, and gradually adapt to hard instances with larger number of training epochs~\cite{memorization}. 
 It trains two networks in parallel and updates the weights of the networks using only the small loss samples and the gradients of the two networks are switched during the parameter update. 
-Our proposed method worked as a plug in for standard adversarial domain adaptation methods.
-As in standard adversarial DA, there are mainly two losses: classification loss (to learn the discriminative features), domain loss (to learn the domain invariant features). and there are three networks $G_f$ ( feature extractor), $G_d$ (domain discriminator), $G_y$ (classifier). In our proposed method for WUDA, two identical feature extractors and classifiers are maintained. Classification loss is calculated only through small loss instances and cross propagated in the peer feature extractor network to update the parameters. However, domain loss is backpropagated as in standard DA using only one feature extractor. Our approach is not restricted to knowing the noise level in the source data, as it is not straight forward to know how much noise is present in the source data. Even in the scenario of very low noise or no noise source data, our approach does not degrade with respect to the standard domain adaptation network.
+In standard DA, there are three networks $G_f$ (feature extractor), $G_d$ (domain discriminator) and $G_y$ (classifier).
+In contrast, the proposed CT-DANN architecture consists of two identical feature extractors and classifiers are maintained.
+There are mainly two losses: classification loss to learn the discriminative features and domain loss to learn the domain invariant features. 
+Classification loss is calculated only through small loss instances and cross propagated in the peer feature extractor network to update the parameters. 
+However, domain loss is backpropagated as in standard DA using only one feature extractor. 
+Our approach is not restricted to knowing the noise level in the source data, as it is not straight forward to know how much noise is present in the source data. Even in the scenario of very low noise, the proposed approach does not degrade with respect to the standard domain adaptation network.
 
 Extensive experiments and comparisons with the state-of-the-art approaches have been performed on three different datasets, namely Office-31 \cite{office31}, Office-Home \cite{officehome} and Bing-Caltech 
 \cite{bing-caltech}. Office 31 and Office Home are clean datasets. We introduce symmetric and pairflip 
-label corruption in these datasets defined in Section \ref{sec:datasets}. Bing-Caltech has native noise in the images collected from search engine Bing. Further, experiments on the Bing-Caltech dataset shows the effectiveness of the approach for real noisy data.
+label corruption in these datasets as defined in Section \ref{sec:datasets}. Bing-Caltech has native noise in the images collected from search engine Bing. 
+%Further, experiments on the Bing-Caltech dataset shows the effectiveness of the approach for real noisy data.
